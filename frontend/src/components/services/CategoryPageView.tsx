@@ -22,6 +22,7 @@ import {
   Minus,
 } from 'lucide-react';
 import { Category, ServiceItem, CartItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 import { ServiceVideoPlayer } from './ServiceVideoPlayer';
 import { SalonWomenCategoryView } from './SalonWomenCategoryView';
 
@@ -977,14 +978,14 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
             {
               id: 'add-ons',
               label: 'Add-ons',
-              thumbnailUrl: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?auto=format&fit=crop&w=200&q=80',
+              thumbnailUrl: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?auto=format&fit=crop&w=200&q=80',
               promoBanner: {
                 badge: 'Extra Pampering',
                 title: 'Add extra pampering to your booking',
                 price: 349,
                 originalPrice: 449,
                 subtitle: 'Foot reflexology, head & shoulder massage, scrubs & stretch therapy',
-                image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?auto=format&fit=crop&w=400&q=80',
+                image: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?auto=format&fit=crop&w=400&q=80',
               },
               filterServiceIds: [
                 'spa-foot-massage',
@@ -1242,11 +1243,20 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
     category.id === 'salon-for-women'
   ) {
     const isLuxe =
-      initialSubService === 'luxe' || initialSubService?.startsWith('luxe-');
+      initialSubService === 'luxe' ||
+      initialSubService?.startsWith('luxe-') ||
+      initialSubService?.toLowerCase().includes('luxe');
+    const matchedSubCategory =
+      initialSubService === 'prime' || initialSubService?.toLowerCase().includes('prime')
+        ? 'prime-derma-facials'
+        : isLuxe
+        ? 'luxe-forest-essentials'
+        : initialSubService;
+
     return (
       <SalonWomenCategoryView
         initialTier={isLuxe ? 'luxe' : 'prime'}
-        initialSubCategory={initialSubService}
+        initialSubCategory={matchedSubCategory}
         cartItems={cartItems}
         onAddToCart={onAddToCart}
         onUpdateCartQuantity={onUpdateCartQuantity}
@@ -1380,6 +1390,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
                             alt={sub.label}
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform"
+                            onError={(e) => handleImageError(e, 'service')}
                           />
                         ) : sub.discountBadge ? (
                           <div className="w-full h-full bg-emerald-50 text-emerald-700 flex flex-col items-center justify-center font-black text-xs leading-none">
@@ -1485,6 +1496,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
                     alt={activeSubService.promoBanner.title}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover object-center"
+                    onError={(e) => handleImageError(e, 'service')}
                   />
                 </div>
               </div>

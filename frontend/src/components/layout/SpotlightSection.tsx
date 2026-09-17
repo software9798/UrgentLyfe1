@@ -113,7 +113,7 @@ export const SpotlightSection: React.FC<SpotlightSectionProps> = ({
       btnText: 'Book now',
       btnBg: 'bg-white hover:bg-slate-100',
       btnTextColor: 'text-slate-900',
-      bgImage: 'https://images.unsplash.com/photo-1512290900672-1f5be4b78917?auto=format&fit=crop&w=800&q=80',
+      bgImage: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
       gradientOverlay: 'from-black/85 via-black/40 to-transparent',
     },
     {

@@ -26,6 +26,7 @@ import {
   Search,
 } from 'lucide-react';
 import { WorkStep } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface ServiceVideoPlayerProps {
   videoUrl?: string;
@@ -774,6 +775,7 @@ export const ServiceVideoPlayer: React.FC<ServiceVideoPlayerProps> = ({
             alt={activeScene.title}
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover filter brightness-[0.82] contrast-[1.06] scale-105 animate-[pulse_8s_ease-in-out_infinite] transition-all duration-1000"
+            onError={(e) => handleImageError(e, 'service')}
           />
           {/* Subtle gradient vignette */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/60" />

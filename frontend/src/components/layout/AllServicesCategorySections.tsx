@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Star, Zap, Plus, Check } from 'lucide-react';
 import { ServiceItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 export interface CategoryCarouselItem {
   id: string;
@@ -791,7 +792,7 @@ export const ALL_CATEGORY_SECTIONS: CategoryCarouselSectionData[] = [
         rating: 4.83,
         reviewCount: 4210,
         durationMinutes: 25,
-        imageUrl: 'https://images.unsplash.com/photo-1595454223600-91fbdd77e20b?auto=format&fit=crop&w=800&q=80',
+        imageUrl: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
         description: 'Gentle, patient haircut for kids and boys at home with rounded-tip child-safe scissors, quiet clippers, and favorite styles.',
         includes: [
           'Kid-friendly gentle hair styling',
@@ -1315,7 +1316,7 @@ export const ALL_CATEGORY_SECTIONS: CategoryCarouselSectionData[] = [
         rating: 4.86,
         reviewCount: 184000,
         durationMinutes: 45,
-        imageUrl: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?auto=format&fit=crop&w=800&q=80',
+        imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
         description: 'Deep micro-pore steam, ultrasonic blackhead whitehead removal, anti-tan scrub & cooling pack for instant glow.',
         includes: [
           'Gentle foaming milk cleanser',
@@ -1851,6 +1852,7 @@ const CategoryCarouselRow: React.FC<{
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover object-center group-hover/card:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    onError={(e) => handleImageError(e, 'service')}
                   />
 
                   {/* Green Discount Pill Top-Left (Exact match from Screenshots 1 & 4 e.g. 20% OFF, 17% OFF) */}

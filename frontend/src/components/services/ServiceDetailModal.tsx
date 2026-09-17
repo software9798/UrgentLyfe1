@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { ServiceItem, CartItem } from '../../types';
 import { getServiceRichDetail, ServiceRichDetail, ServiceReview } from '../../data/richServiceDetails';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface ServiceDetailModalProps {
   service: ServiceItem | null;
@@ -159,6 +160,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                 alt={detail.bannerHeadline}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => handleImageError(e, 'service')}
               />
             </div>
           </div>
@@ -266,6 +268,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         referrerPolicy="no-referrer"
+                        onError={(e) => handleImageError(e, 'service')}
                       />
                     </div>
                     <div className="p-2.5 text-xs font-bold text-slate-800 leading-snug">
@@ -312,6 +315,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                         alt={tech.title}
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
+                        onError={(e) => handleImageError(e, 'service')}
                       />
                     </div>
                     <div className="p-3">
@@ -386,6 +390,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                   alt="Consultation"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => handleImageError(e, 'service')}
                 />
               </div>
             </div>
@@ -420,6 +425,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                         alt={step.title}
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
+                        onError={(e) => handleImageError(e, 'service')}
                       />
                     </div>
                   )}
@@ -447,6 +453,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                 alt={detail.setupTitle}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => handleImageError(e, 'service')}
               />
             </div>
           </div>
@@ -472,6 +479,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                 alt="Verified Professional"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => handleImageError(e, 'service')}
               />
             </div>
           </div>

@@ -23,6 +23,7 @@ export * from './services/CategoryGrid';
 export * from './services/CategoryPageView';
 export * from './services/SalonWomenCategoryView';
 export * from './services/SalonDermaModal';
+export * from './services/SalonCategoryVisuals';
 export * from './services/SalonMenPreferenceModal';
 export * from './services/SalonMenCategoryView';
 export * from './services/ServiceCard';
@@ -38,6 +39,9 @@ export * from './booking/LiveTrackingModal';
 export * from './booking/DirectionsModal';
 export * from './booking/InvoiceModal';
 export * from './booking/PostServiceFeedbackModal';
+
+// Appliance Components & Views
+export * from './appliances';
 
 // AI Assistants & Diagnostics Components
 export * from './ai/FloatingAIAssistant';

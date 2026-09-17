@@ -1,27 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  AirVent,
-  Zap,
-  Droplets,
-  Hammer,
-  Sparkles,
-  Paintbrush,
-  Scissors,
-  ShieldAlert,
-  Grid,
   Clock,
   ArrowRight,
   ShieldCheck,
   Star,
   Award,
   Wrench,
-  Search,
+  Zap,
 } from 'lucide-react';
+import {
+  AcApplianceVisual,
+  InstaHelpVisual,
+  WomensSalonVisual,
+  CarpenterToolsVisual,
+  CleaningPestVisual,
+  HomePaintingVisual,
+  MensSalonVisual,
+  WallPanelsVisual,
+  EmergencyRepairsVisual,
+  OtherServicesVisual,
+} from './Category3DVisuals';
 
 interface HeroSectionProps {
   selectedCityName: string;
   selectedLocality?: string;
+  selectedCategoryId?: string;
   onSelectCategory: (categoryId: string) => void;
+  onOpenApplianceRepair?: () => void;
   onBookService?: () => void;
   onQuickSOS: () => void;
   onOpenAIDoctor: () => void;
@@ -31,93 +36,96 @@ interface HeroSectionProps {
 export const HeroSection: React.FC<HeroSectionProps> = ({
   selectedCityName,
   selectedLocality,
+  selectedCategoryId = 'carpentry-painting',
   onSelectCategory,
+  onOpenApplianceRepair,
   onBookService,
   onQuickSOS,
   onOpenAIDoctor,
 }) => {
-  // Service category definitions matching IMAGE 2 structure with arrival badges
+  // Local state for active category selection (defaults to Electrician, Plumber & Carpenter as shown in reference image)
+  const [activeCatId, setActiveCatId] = useState<string>(
+    selectedCategoryId && selectedCategoryId !== 'all' ? selectedCategoryId : 'carpentry-painting'
+  );
+
+  useEffect(() => {
+    if (selectedCategoryId && selectedCategoryId !== 'all') {
+      setActiveCatId(selectedCategoryId);
+    }
+  }, [selectedCategoryId]);
+
+  // Service category definitions matching exact 3D reference image
   const HERO_CATEGORIES = [
     {
       id: 'ac-appliance',
       name: 'AC & Appliance Repair',
       arrival: '44 mins',
-      icon: <AirVent className="w-6 h-6 text-sky-600" />,
-      bg: 'bg-sky-50',
-      badgeColor: 'text-sky-700 bg-sky-100',
+      visual: <AcApplianceVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#e0f2fe] text-[#0284c7]',
     },
     {
-      id: 'electrical',
-      name: 'Electrician',
+      id: 'instahelp',
+      name: 'InstaHelp',
       arrival: '49 mins',
-      icon: <Zap className="w-6 h-6 text-amber-600" />,
-      bg: 'bg-amber-50',
-      badgeColor: 'text-amber-700 bg-amber-100',
+      visual: <InstaHelpVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#fef3c7] text-[#b45309]',
     },
     {
-      id: 'plumbing',
-      name: 'Plumber',
+      id: 'salon',
+      name: "Women's Salon & Spa",
       arrival: '45 mins',
-      icon: <Droplets className="w-6 h-6 text-blue-600" />,
-      bg: 'bg-blue-50',
-      badgeColor: 'text-blue-700 bg-blue-100',
+      visual: <WomensSalonVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#e0f2fe] text-[#0284c7]',
     },
     {
       id: 'carpentry-painting',
-      name: 'Carpenter',
+      name: 'Electrician, Plumber & Carpenter',
       arrival: '55 mins',
-      icon: <Hammer className="w-6 h-6 text-orange-600" />,
-      bg: 'bg-orange-50',
-      badgeColor: 'text-orange-700 bg-orange-100',
+      visual: <CarpenterToolsVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#ffedd5] text-[#9a3412]',
     },
     {
       id: 'pest-control',
       name: 'Cleaning & Pest Control',
       arrival: '50 mins',
-      icon: <Sparkles className="w-6 h-6 text-teal-600" />,
-      bg: 'bg-teal-50',
-      badgeColor: 'text-teal-700 bg-teal-100',
+      visual: <CleaningPestVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#dcfce7] text-[#15803d]',
     },
     {
       id: 'painting',
-      name: 'Home Painting',
+      name: 'Home Painting & Upgrade',
       arrival: 'Tomorrow',
-      icon: <Paintbrush className="w-6 h-6 text-emerald-600" />,
-      bg: 'bg-emerald-50',
-      badgeColor: 'text-emerald-700 bg-emerald-100',
+      visual: <HomePaintingVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#dcfce7] text-[#15803d]',
     },
     {
-      id: 'cleaning',
-      name: 'Deep Cleaning',
+      id: 'men-salon',
+      name: "Men's Salon & Massage",
       arrival: '60 mins',
-      icon: <Sparkles className="w-6 h-6 text-indigo-600" />,
-      bg: 'bg-indigo-50',
-      badgeColor: 'text-indigo-700 bg-indigo-100',
+      visual: <MensSalonVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#e0e7ff] text-[#4338ca]',
     },
     {
-      id: 'salon',
-      name: 'Salon for Women',
+      id: 'wall-panels',
+      name: 'Wall Panels by Revamp',
       arrival: '47 mins',
-      icon: <Scissors className="w-6 h-6 text-pink-600" />,
-      bg: 'bg-pink-50',
-      badgeColor: 'text-pink-700 bg-pink-100',
+      visual: <WallPanelsVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#ffe4e6] text-[#be123c]',
     },
     {
       id: 'all',
       name: 'Emergency Repairs',
       arrival: '30 mins SOS',
       isSOS: true,
-      icon: <ShieldAlert className="w-6 h-6 text-rose-600" />,
-      bg: 'bg-rose-50',
-      badgeColor: 'text-rose-700 bg-rose-100 font-black animate-pulse',
+      visual: <EmergencyRepairsVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#fee2e2] text-[#dc2626]',
     },
     {
       id: 'appliance',
       name: 'Other Home Services',
       arrival: 'Instant',
-      icon: <Grid className="w-6 h-6 text-purple-600" />,
-      bg: 'bg-purple-50',
-      badgeColor: 'text-purple-700 bg-purple-100',
+      visual: <OtherServicesVisual className="w-14 h-12 sm:w-16 sm:h-14" />,
+      badgeColor: 'bg-[#f3e8ff] text-[#7e22ce]',
     },
   ];
 
@@ -147,56 +155,78 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </p>
             </div>
 
-            {/* Prominent Category Grid Card (Directly inspired by IMAGE 2 left card) */}
-            <div className="bg-slate-50/70 border border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-xs">
-              <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                  Select Category
+            {/* Prominent Category Grid Card (Directly matching user's reference image) */}
+            <div id="select-category-section" className="bg-white border border-slate-200/90 rounded-[28px] p-4 sm:p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)]">
+              <div className="flex items-center justify-between mb-3.5 px-1">
+                <span className="text-xs sm:text-[13px] font-black uppercase tracking-wider text-slate-600">
+                  SELECT CATEGORY
                 </span>
-                <span className="text-[11px] font-medium text-blue-600 flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> Live ETA enabled
+                <span className="text-xs font-semibold text-blue-600 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-blue-600" /> Live ETA enabled
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3">
-                {HERO_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id + cat.name}
-                    onClick={() => {
-                      if (cat.isSOS) {
-                        onQuickSOS();
-                      } else {
-                        onSelectCategory(cat.id);
-                        const el = document.getElementById('services-catalog-grid');
-                        el?.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                    className={`flex flex-col items-center justify-between p-2.5 sm:p-3 rounded-2xl border transition-all duration-200 cursor-pointer group hover:-translate-y-1 hover:shadow-md ${
-                      cat.isSOS
-                        ? 'bg-rose-50/60 border-rose-200 hover:border-rose-400'
-                        : 'bg-white border-slate-200/80 hover:border-blue-400'
-                    }`}
-                  >
-                    {/* Icon Container with Floating ETA Badge */}
-                    <div className="relative mb-2">
-                      <div
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${cat.bg}`}
-                      >
-                        {cat.icon}
-                      </div>
-                      <span
-                        className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border border-white shadow-xs whitespace-nowrap ${cat.badgeColor}`}
-                      >
-                        {cat.arrival}
-                      </span>
-                    </div>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
+                {HERO_CATEGORIES.map((cat) => {
+                  const isSelected = activeCatId === cat.id;
+                  const isSOS = cat.isSOS;
 
-                    {/* Category Label */}
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-800 text-center leading-tight mt-1 group-hover:text-blue-600">
-                      {cat.name}
-                    </span>
-                  </button>
-                ))}
+                  return (
+                    <button
+                      key={cat.id + cat.name}
+                      onClick={() => {
+                        setActiveCatId(cat.id);
+                        if (cat.isSOS) {
+                          onQuickSOS();
+                        } else if (cat.id === 'ac-appliance') {
+                          if (onOpenApplianceRepair) {
+                            onOpenApplianceRepair();
+                          } else {
+                            onSelectCategory(cat.id);
+                          }
+                        } else if (cat.id === 'salon') {
+                          onSelectCategory(cat.id);
+                        } else {
+                          onSelectCategory(cat.id);
+                          const el = document.getElementById('services-catalog-grid');
+                          el?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                      className={`group flex flex-col items-center justify-between p-2 sm:p-2.5 md:p-3 rounded-2xl border transition-all duration-200 cursor-pointer text-center relative hover:-translate-y-0.5 hover:shadow-md min-h-[145px] sm:min-h-[155px] ${
+                        isSOS
+                          ? 'bg-[#fff1f2] border-[#fecdd3] hover:border-rose-300'
+                          : isSelected
+                          ? 'bg-[#f0f7ff] border-blue-500 ring-1 ring-blue-400 shadow-xs'
+                          : 'bg-white border-slate-200/90 hover:border-slate-300'
+                      }`}
+                    >
+                      {/* 3D Illustration matching reference */}
+                      <div className="w-full flex items-center justify-center pt-0.5 pb-1 transition-transform duration-200 group-hover:scale-105">
+                        {cat.visual}
+                      </div>
+
+                      {/* Live ETA / Time Badge */}
+                      <div className="my-0.5">
+                        <span
+                          className={`inline-block text-[9.5px] sm:text-[10px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap shadow-2xs ${cat.badgeColor}`}
+                        >
+                          {cat.arrival}
+                        </span>
+                      </div>
+
+                      {/* Category Label */}
+                      <span
+                        className={`text-[11px] sm:text-xs font-bold leading-tight mt-1 transition-colors px-0.5 ${
+                          isSelected
+                            ? 'text-slate-950 font-extrabold'
+                            : 'text-slate-800 group-hover:text-blue-600'
+                        }`}
+                      >
+                        {cat.name}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

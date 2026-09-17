@@ -37,6 +37,10 @@ import {
   SalonDermaModal,
   HelpCenterView,
   MyBookingsView,
+  ApplianceRepairModal,
+  ApplianceDedicatedPage,
+  ApplianceConfig,
+  APPLIANCES_LIST,
   Footer,
 } from './components';
 
@@ -57,6 +61,10 @@ export default function App() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [activeCategoryPageView, setActiveCategoryPageView] = useState<Category | null>(null);
   const [activeCategoryInitialSubService, setActiveCategoryInitialSubService] = useState<string | undefined>(undefined);
+
+  // AC & Appliance Repair Modal and Dedicated Appliance Screen
+  const [isApplianceModalOpen, setIsApplianceModalOpen] = useState<boolean>(false);
+  const [selectedAppliance, setSelectedAppliance] = useState<ApplianceConfig | null>(null);
   const [services, setServices] = useState<ServiceItem[]>(() => {
     const extra = getAllCategoryServices();
     const existingIds = new Set(SERVICES.map((s) => s.id));
@@ -500,21 +508,25 @@ export default function App() {
         onLogout={handleLogout}
         onOpenHelpCenter={() => {
           setActiveCategoryPageView(null);
+          setSelectedAppliance(null);
           setActiveTab('help');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onOpenMyBookings={() => {
           setActiveCategoryPageView(null);
+          setSelectedAppliance(null);
           setActiveTab('my_bookings');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onNavigateHome={() => {
           setActiveCategoryPageView(null);
+          setSelectedAppliance(null);
           setActiveTab('services');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onNavigateServices={() => {
           setActiveCategoryPageView(null);
+          setSelectedAppliance(null);
           setActiveTab('services');
           setTimeout(() => {
             document.getElementById('services-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
@@ -649,6 +661,30 @@ export default function App() {
             }}
           />
         </main>
+      ) : selectedAppliance ? (
+        /* Dedicated Appliance Service & Repair Page */
+        <main className="flex-1 pb-24 md:pb-16">
+          <ApplianceDedicatedPage
+            appliance={selectedAppliance}
+            onBack={() => {
+              setSelectedAppliance(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onOpenApplianceGrid={() => {
+              setIsApplianceModalOpen(true);
+            }}
+            onSelectAnotherAppliance={(nextAppliance) => {
+              setSelectedAppliance(nextAppliance);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            cartItems={cartItems}
+            onAddToCart={handleAddToCart}
+            onUpdateCartQuantity={handleUpdateCartQuantity}
+            onBookNow={(srv, isUrgent) => handleStartBooking(srv, isUrgent)}
+            selectedCityName={selectedCity.name}
+            selectedLocality={selectedLocality}
+          />
+        </main>
       ) : activeCategoryPageView ? (
         /* Dedicated Category Service Page (with interactive video demonstration and sub-services) */
         <main className="flex-1 pb-24 md:pb-16">
@@ -682,12 +718,25 @@ export default function App() {
           <HeroSection
             selectedCityName={selectedCity.name}
             selectedLocality={selectedLocality}
+            selectedCategoryId={selectedCategoryId}
+            onOpenApplianceRepair={() => {
+              setIsApplianceModalOpen(true);
+            }}
             onSelectCategory={(catId) => {
+              if (catId === 'ac-appliance') {
+                setIsApplianceModalOpen(true);
+                return;
+              }
               if (catId === 'salon') {
                 handleOpenSalon();
                 return;
               }
-              setSelectedCategoryId(catId);
+              if (catId === 'men-salon') {
+                handleOpenSalon('Men Grooming & Haircut');
+                return;
+              }
+              const mappedId = catId === 'wall-panels' ? 'carpentry-painting' : catId;
+              setSelectedCategoryId(mappedId);
               setTimeout(() => {
                 document.getElementById('services-catalog-grid')?.scrollIntoView({ behavior: 'smooth' });
               }, 50);
@@ -705,6 +754,21 @@ export default function App() {
           {/* Trust & Statistics + "In the spotlight" Section */}
           <SpotlightSection
             onSelectCategory={(categoryId, subServiceKey) => {
+              if (categoryId === 'ac-appliance') {
+                if (subServiceKey) {
+                  const targetApp = APPLIANCES_LIST.find(
+                    (a) => a.id === subServiceKey || a.label.toLowerCase().includes(subServiceKey.toLowerCase())
+                  );
+                  if (targetApp) {
+                    setSelectedAppliance(targetApp);
+                    setActiveCategoryPageView(null);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                  }
+                }
+                setIsApplianceModalOpen(true);
+                return;
+              }
               const cat = categories.find((c) => c.id === categoryId);
               if (cat) {
                 setActiveCategoryInitialSubService(subServiceKey);
@@ -723,6 +787,21 @@ export default function App() {
           {/* New and noteworthy Section (Directly after In the spotlight) */}
           <NewAndNoteworthySection
             onSelectService={(categoryId, subServiceKey) => {
+              if (categoryId === 'ac-appliance') {
+                if (subServiceKey) {
+                  const targetApp = APPLIANCES_LIST.find(
+                    (a) => a.id === subServiceKey || a.label.toLowerCase().includes(subServiceKey.toLowerCase())
+                  );
+                  if (targetApp) {
+                    setSelectedAppliance(targetApp);
+                    setActiveCategoryPageView(null);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                  }
+                }
+                setIsApplianceModalOpen(true);
+                return;
+              }
               const cat = categories.find((c) => c.id === categoryId);
               if (cat) {
                 setActiveCategoryInitialSubService(subServiceKey);
@@ -738,6 +817,21 @@ export default function App() {
             selectedLocality={selectedLocality}
             onSelectLocality={(loc) => setSelectedLocality(loc)}
             onSelectService={(categoryId, subServiceKey) => {
+              if (categoryId === 'ac-appliance') {
+                if (subServiceKey) {
+                  const targetApp = APPLIANCES_LIST.find(
+                    (a) => a.id === subServiceKey || a.label.toLowerCase().includes(subServiceKey.toLowerCase())
+                  );
+                  if (targetApp) {
+                    setSelectedAppliance(targetApp);
+                    setActiveCategoryPageView(null);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                  }
+                }
+                setIsApplianceModalOpen(true);
+                return;
+              }
               const cat = categories.find((c) => c.id === categoryId);
               if (cat) {
                 setActiveCategoryInitialSubService(subServiceKey);
@@ -788,6 +882,10 @@ export default function App() {
               searchQuery={searchQuery}
               onClearSearch={() => setSearchQuery('')}
               onSelectCategory={(catId) => {
+                if (catId === 'ac-appliance') {
+                  setIsApplianceModalOpen(true);
+                  return;
+                }
                 if (catId === 'salon') {
                   handleOpenSalon();
                   return;
@@ -1036,11 +1134,34 @@ export default function App() {
           setIsSalonDermaModalOpen(false);
           const salonCat = categories.find((c) => c.id === 'salon');
           if (salonCat) {
-            setActiveCategoryInitialSubService(tier);
+            setActiveCategoryInitialSubService(tier === 'luxe' ? 'Derma facials (Luxe)' : 'Derma facials (Prime)');
             setActiveCategoryPageView(salonCat);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         }}
+        onSelectCategoryItem={(categoryTitle) => {
+          setIsSalonDermaModalOpen(false);
+          const salonCat = categories.find((c) => c.id === 'salon');
+          if (salonCat) {
+            setActiveCategoryInitialSubService(categoryTitle);
+            setActiveCategoryPageView(salonCat);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
+      />
+
+      {/* AC & Appliance Repair Modal Overlay matching exact UI reference */}
+      <ApplianceRepairModal
+        isOpen={isApplianceModalOpen}
+        onClose={() => setIsApplianceModalOpen(false)}
+        onSelectAppliance={(appliance) => {
+          setIsApplianceModalOpen(false);
+          setActiveCategoryPageView(null);
+          setSelectedAppliance(appliance);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        selectedCityName={selectedCity.name}
+        selectedLocality={selectedLocality}
       />
 
       {/* Services Shopping Cart Drawer */}

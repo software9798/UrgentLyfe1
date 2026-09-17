@@ -17,6 +17,7 @@ import {
   Search,
 } from 'lucide-react';
 import { ServiceItem, CartItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface SalonMenCategoryViewProps {
   initialTier?: 'royale' | 'prime';
@@ -118,7 +119,7 @@ export const MEN_SALON_SERVICES: Record<'royale' | 'prime', ServiceItem[]> = {
         'Cooling cryo-globe lymphatic drainage massage',
       ],
       toolsUsed: ['O3+ Monodose Kit', 'Ultrasonic Scrubber', 'Cryo Ice Globes'],
-      image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80',
       tags: ['O3+ Professional', 'Instant Glow'],
     },
     {
@@ -230,7 +231,7 @@ export const MEN_SALON_SERVICES: Record<'royale' | 'prime', ServiceItem[]> = {
         'Zero-mess floor cleanup',
       ],
       toolsUsed: ['Low-Noise Child Clippers', 'Blunt Tip Shears', 'Sanitized Cape'],
-      image: 'https://images.unsplash.com/photo-1595454223600-91fbdd77e20b?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
       tags: ['Kids Safe', 'Quiet Clippers'],
     },
     {
@@ -362,7 +363,7 @@ export const MEN_SALON_SERVICES: Record<'royale' | 'prime', ServiceItem[]> = {
         'Calming aloe vera moisturizer massage',
       ],
       toolsUsed: ['Bombay Shaving Kit', 'Ultrasonic Spatula', 'Face Steamer'],
-      image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=800&q=80',
       tags: ['Bombay Shaving Co', 'Pore Cleansing'],
     },
   ],
@@ -600,6 +601,7 @@ export const SalonMenCategoryView: React.FC<SalonMenCategoryViewProps> = ({
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => handleImageError(e, 'men')}
                       />
                       {service.discountPercent && (
                         <span className="absolute top-1.5 left-1.5 bg-emerald-600 text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-xs">

@@ -101,6 +101,13 @@ export interface ServiceItem {
   isUrgentAvailable?: boolean;
   urgentFee?: number;
   tags?: string[];
+  optionsCount?: number;
+  startsAt?: boolean;
+  packageDetails?: { label: string; text: string }[];
+  isPackage?: boolean;
+  isExclusive?: boolean;
+  isBestseller?: boolean;
+  isFreeGift?: boolean;
 }
 
 export interface CartItem {

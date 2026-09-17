@@ -1,11 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Star,
   Clock,
   Check,
-  CheckCircle2,
-  Sparkles,
   ShieldCheck,
   Zap,
   MapPin,
@@ -21,10 +19,9 @@ import {
   Flame,
   Package,
   ChevronRight,
-  Info,
   Search,
   X,
-  Play,
+  Gift,
 } from 'lucide-react';
 import { ServiceItem, CartItem } from '../../types';
 import {
@@ -32,6 +29,10 @@ import {
   SALON_LUXE_CATEGORIES,
   SalonSubCategory,
 } from '../../data/salonData';
+import { handleImageError } from '../../utils/imageFallback';
+import { SalonLuxeHero } from './SalonLuxeHero';
+import { SalonServiceOptionsModal } from './SalonServiceOptionsModal';
+import { SalonEditPackageModal } from './SalonEditPackageModal';
 
 interface SalonWomenCategoryViewProps {
   initialTier?: 'prime' | 'luxe';
@@ -62,8 +63,12 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
   const [activeTier, setActiveTier] = useState<'prime' | 'luxe'>(initialTier);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilterTag, setSelectedFilterTag] = useState<string>('All');
-  const [isCryoDemoOpen, setIsCryoDemoOpen] = useState(false);
   const [isGoldRitualOpen, setIsGoldRitualOpen] = useState(false);
+  
+  // Interactive options & package customizers
+  const [serviceForOptions, setServiceForOptions] = useState<ServiceItem | null>(null);
+  const [packageToEdit, setPackageToEdit] = useState<ServiceItem | null>(null);
+  const [couponApplied, setCouponApplied] = useState(false);
 
   // Categories based on active tier
   const categories: SalonSubCategory[] =
@@ -75,12 +80,12 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
       const match = categories.find((c) => c.id === initialSubCategory || c.id.includes(initialSubCategory));
       if (match) return match.id;
     }
-    return categories[0]?.id || 'packages';
+    return categories[0]?.id || 'luxe-packages';
   });
 
   // Keep active category synced if tier changes
   useEffect(() => {
-    setActiveCategoryId(categories[0]?.id || 'packages');
+    setActiveCategoryId(categories[0]?.id || 'luxe-packages');
     setSelectedFilterTag('All');
   }, [activeTier]);
 
@@ -96,11 +101,15 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
   };
 
   // Cart total sum
-  const cartTotal = cartItems.reduce(
+  const cartSubtotal = cartItems.reduce(
     (acc, item) => acc + item.service.price * item.quantity,
     0
   );
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Coupon calculations (25% off up to ₹200)
+  const couponDiscount = couponApplied ? Math.min(200, Math.round(cartSubtotal * 0.25)) : 0;
+  const finalCartTotal = Math.max(0, cartSubtotal - couponDiscount);
 
   // Salon specific items count in cart (for "Make your own package" 3+ services unlock)
   const salonItemsInCart = cartItems.filter(
@@ -147,27 +156,27 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
   const renderCategoryIcon = (iconName: string) => {
     switch (iconName) {
       case 'Package':
-        return <Package className="w-5 h-5" />;
+        return <Package className="w-4 h-4" />;
       case 'Sparkles':
-        return <Sparkles className="w-5 h-5" />;
+        return <Crown className="w-4 h-4" />;
       case 'Crown':
-        return <Crown className="w-5 h-5" />;
+        return <Crown className="w-4 h-4" />;
       case 'Zap':
-        return <Zap className="w-5 h-5" />;
+        return <Zap className="w-4 h-4" />;
       case 'Flower2':
-        return <Flower2 className="w-5 h-5" />;
+        return <Flower2 className="w-4 h-4" />;
       case 'Heart':
-        return <Heart className="w-5 h-5" />;
+        return <Heart className="w-4 h-4" />;
       case 'Smile':
-        return <Smile className="w-5 h-5" />;
+        return <Smile className="w-4 h-4" />;
       case 'Footprints':
-        return <Footprints className="w-5 h-5" />;
+        return <Footprints className="w-4 h-4" />;
       case 'Scissors':
-        return <Scissors className="w-5 h-5" />;
+        return <Scissors className="w-4 h-4" />;
       case 'Flame':
-        return <Flame className="w-5 h-5" />;
+        return <Flame className="w-4 h-4" />;
       default:
-        return <Sparkles className="w-5 h-5" />;
+        return <Crown className="w-4 h-4" />;
     }
   };
 
@@ -178,7 +187,6 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
   const filterTags = getCategoryFilterTags(activeCategory.id, activeTier);
 
   const displayedServices = activeCategory.services.filter((srv) => {
-    // Check search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchSearch =
@@ -188,7 +196,6 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
       if (!matchSearch) return false;
     }
 
-    // Check filter tag
     if (selectedFilterTag !== 'All') {
       const tagLower = selectedFilterTag.toLowerCase();
       const matchTag =
@@ -202,6 +209,15 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
 
     return true;
   });
+
+  const handleCategorySelect = (categoryId: string) => {
+    setActiveCategoryId(categoryId);
+    setSearchQuery('');
+    const targetElement = document.getElementById('services-list-container');
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] pb-28 text-slate-900">
@@ -229,15 +245,44 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
             </div>
           </div>
 
-          {/* Location Badge */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full shrink-0">
-            <MapPin className="w-3.5 h-3.5 text-purple-600" />
-            <span className="font-semibold text-slate-900">{selectedLocality}</span>
-            <span className="text-slate-400">, {selectedCityName}</span>
+          {/* Tier Switcher in top navigation bar */}
+          <div className="flex items-center gap-2">
+            <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setActiveTier('prime')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeTier === 'prime'
+                    ? 'bg-white text-blue-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Prime
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTier('luxe')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                  activeTier === 'luxe'
+                    ? 'bg-amber-950 text-amber-300 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Crown className="w-3 h-3 text-amber-400" />
+                <span>Luxe</span>
+              </button>
+            </div>
+
+            {/* Location Badge */}
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full shrink-0">
+              <MapPin className="w-3.5 h-3.5 text-purple-600" />
+              <span className="font-semibold text-slate-900">{selectedLocality}</span>
+              <span className="text-slate-400">, {selectedCityName}</span>
+            </div>
           </div>
         </div>
 
-        {/* Search Bar in Category */}
+        {/* Search Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 space-y-2">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -250,7 +295,7 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
             />
           </div>
 
-          {/* Mobile Horizontal Category Pills (Quick Access on Mobile) */}
+          {/* Mobile Horizontal Category Pills */}
           <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none pt-1">
             {categories.map((cat) => {
               const isSelected = cat.id === activeCategoryId;
@@ -286,77 +331,46 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
         </div>
       </div>
 
-      {/* 2. TIER SWITCHER HEADER (SALON PRIME vs SALON LUXE - Direct from Videos) */}
-      <div className="bg-gradient-to-b from-slate-100/80 to-[#fcfcfd] border-b border-slate-200/80 pt-6 pb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            {/* Title & Stats */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span
-                  className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md ${
-                    activeTier === 'luxe'
-                      ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                      : 'bg-blue-100 text-blue-900 border border-blue-200'
-                  }`}
-                >
-                  {activeTier === 'luxe' ? '⭐ Forest Essentials & Korean' : 'Affordable Branded Salon'}
+      {/* 2. TOP HERO FOR SALON LUXE (Exact from Video 2) */}
+      {activeTier === 'luxe' ? (
+        <SalonLuxeHero
+          categories={categories}
+          activeCategoryId={activeCategoryId}
+          onSelectCategory={handleCategorySelect}
+          onOpenVideoModal={() => setIsGoldRitualOpen(true)}
+        />
+      ) : (
+        /* SALON PRIME HEADER */
+        <div className="bg-gradient-to-b from-blue-50/60 to-[#fcfcfd] border-b border-slate-200/80 pt-6 pb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-900 border border-blue-200">
+                  Affordable Branded Salon
                 </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                {activeTier === 'luxe' ? 'Salon Luxe' : 'Salon Prime'}
-              </h1>
-              <div className="flex items-center gap-2 text-xs text-slate-600 mt-1">
-                <div className="flex items-center gap-1 font-bold text-slate-900">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                  <span>{activeTier === 'luxe' ? '4.88' : '4.86'}</span>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+                  Salon Prime
+                </h1>
+                <div className="flex items-center gap-2 text-xs text-slate-600 mt-1">
+                  <div className="flex items-center gap-1 font-bold text-slate-900">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                    <span>4.86</span>
+                  </div>
+                  <span>•</span>
+                  <span>1.9M bookings</span>
+                  <span>•</span>
+                  <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
+                    Single-use sealed kits
+                  </span>
                 </div>
-                <span className="text-slate-400">•</span>
-                <span>{activeTier === 'luxe' ? '480K bookings' : '1.9M bookings'}</span>
-                <span className="text-slate-400">•</span>
-                <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
-                  Single-use sealed kits
-                </span>
               </div>
-            </div>
-
-            {/* Interactive Toggle Switch matching both video tiers */}
-            <div className="bg-slate-200/90 p-1.5 rounded-2xl flex items-center gap-1 shrink-0 self-start sm:self-auto border border-slate-300 shadow-inner">
-              <button
-                type="button"
-                onClick={() => setActiveTier('prime')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTier === 'prime'
-                    ? 'bg-white text-blue-800 shadow-md scale-[1.02]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4 text-blue-600" />
-                <span>Salon Prime</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTier('luxe')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTier === 'luxe'
-                    ? 'bg-slate-950 text-amber-300 shadow-md scale-[1.02]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
-                }`}
-              >
-                <Crown className="w-4 h-4 text-amber-400" />
-                <span>Salon Luxe</span>
-                <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.2 rounded font-black">
-                  Luxe
-                </span>
-              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 3. MAIN CONTENT: 3-COLUMN LAYOUT DIRECTLY MATCHING VIDEOS */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <div id="services-list-container" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* ===================================================================== */}
           {/* COLUMN 1: LEFT SUB-CATEGORIES SIDEBAR (STICKY ON DESKTOP) */}
@@ -382,12 +396,13 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
                     onClick={() => {
                       setActiveCategoryId(cat.id);
                       setSearchQuery('');
-                      window.scrollTo({ top: 180, behavior: 'smooth' });
+                      const el = document.getElementById('services-main-content');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }}
                     className={`flex items-center justify-between p-3 rounded-2xl text-left text-xs font-bold transition-all cursor-pointer shrink-0 lg:w-full border ${
                       isSelected
                         ? activeTier === 'luxe'
-                          ? 'bg-purple-950 text-white border-purple-950 shadow-md ring-2 ring-purple-400/30'
+                          ? 'bg-amber-950 text-amber-200 border-amber-900 shadow-md ring-2 ring-amber-400/20'
                           : 'bg-blue-900 text-white border-blue-900 shadow-md ring-2 ring-blue-400/30'
                         : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200/80 hover:border-slate-300'
                     }`}
@@ -405,7 +420,6 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
                       <span className="truncate">{cat.name}</span>
                     </div>
 
-                    {/* Discount or New launch Badge */}
                     {cat.badge && (
                       <span
                         className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ml-2 shrink-0 ${
@@ -422,116 +436,20 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
               })}
             </div>
 
-            {/* Quick Helper Badge */}
-            <div className="hidden lg:flex items-center gap-2 p-3.5 bg-purple-50/70 border border-purple-200/80 rounded-2xl text-xs text-purple-950 mt-4">
-              <Info className="w-4 h-4 text-purple-700 shrink-0" />
+            {/* Quick Hygiene Badge */}
+            <div className="hidden lg:flex items-center gap-2 p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-xs text-amber-950 mt-4">
+              <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
               <span>
-                All female therapists are 100% background checked with 5+ yrs experience.
+                All female therapists are 100% background checked with sealed monodosage kits.
               </span>
             </div>
           </div>
 
           {/* ===================================================================== */}
-          {/* COLUMN 2: CENTER SERVICE CARDS & PROMO BANNERS (MATCHING VIDEOS) */}
+          {/* COLUMN 2: CENTER SERVICE CARDS & PROMO BANNERS */}
           {/* ===================================================================== */}
-          <div className="lg:col-span-6 space-y-6">
-            {/* Top Video / Hero Banner matching Videos */}
-            {activeTier === 'luxe' ? (
-              /* FOREST ESSENTIALS LUXE BANNER (Video 2, 00:09) */
-              <div className="relative rounded-3xl overflow-hidden shadow-lg border border-amber-200/60 bg-gradient-to-r from-amber-950 via-slate-900 to-stone-900 text-white p-6">
-                <div className="relative z-10 max-w-sm space-y-2">
-                  <div className="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-300 border border-amber-300/30 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-                    <Crown className="w-3 h-3 text-amber-300" />
-                    FOREST ESSENTIALS LUXURIOUS AYURVEDA
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-amber-100 tracking-tight leading-tight">
-                    Soundarya 24K Gold age-defying facial
-                  </h2>
-                  <p className="text-xs text-amber-200/80 leading-relaxed font-medium">
-                    Pure 24K gold bhasma, Kashmiri saffron & walnut gommage for royal bridal glow
-                  </p>
-                  <div className="pt-2 flex flex-wrap items-center gap-2 sm:gap-3">
-                    <span className="text-sm font-black text-white">Starting at ₹2,299</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const target = categories.find((c) => c.id === 'luxe-forest-essentials');
-                        if (target) setActiveCategoryId(target.id);
-                      }}
-                      className="bg-amber-400 hover:bg-amber-300 text-slate-950 px-3.5 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer"
-                    >
-                      Explore Rituals
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsGoldRitualOpen(true)}
-                      className="bg-white/15 hover:bg-white/25 border border-amber-300/40 text-amber-200 px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Play className="w-3 h-3 fill-amber-300 text-amber-300" />
-                      <span>4-Step Ritual Demo</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Aesthetic image */}
-                <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-40 sm:opacity-90 overflow-hidden pointer-events-none">
-                  <img
-                    src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=400&q=80"
-                    alt="Ayurveda Luxury"
-                    className="w-full h-full object-cover object-center"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-transparent to-transparent" />
-                </div>
-              </div>
-            ) : (
-              /* SALON PRIME DERMA FACIALS BANNER (Video 1, 00:07) */
-              <div className="relative rounded-3xl overflow-hidden shadow-lg border border-purple-200/60 bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 text-white p-6">
-                <div className="relative z-10 max-w-sm space-y-2">
-                  <div className="inline-flex items-center gap-1.5 bg-purple-400/20 text-purple-300 border border-purple-300/30 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-                    <Sparkles className="w-3 h-3 text-purple-300" />
-                    New launch: Derma Facials
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight">
-                    Niacinamide depigmentation derma facial
-                  </h2>
-                  <p className="text-xs text-purple-200/80 leading-relaxed font-medium">
-                    Targeted actives, powered by Cryofacial Cold Therapy probe (-5°C)
-                  </p>
-                  <div className="pt-2 flex flex-wrap items-center gap-2 sm:gap-3">
-                    <span className="text-sm font-black text-white">Starting at ₹1,599</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const target = categories.find((c) => c.id === 'prime-derma-facials');
-                        if (target) setActiveCategoryId(target.id);
-                      }}
-                      className="bg-white hover:bg-slate-100 text-purple-950 px-3.5 py-1.5 rounded-xl font-black text-xs transition-all cursor-pointer"
-                    >
-                      View Facials
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsCryoDemoOpen(true)}
-                      className="bg-white/15 hover:bg-white/25 border border-purple-300/40 text-purple-200 px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Play className="w-3 h-3 fill-purple-300 text-purple-300" />
-                      <span>Cryo-Wand Demo (-5°C)</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-40 sm:opacity-90 overflow-hidden pointer-events-none">
-                  <img
-                    src="https://images.unsplash.com/photo-1512290900672-1f41d911b306?auto=format&fit=crop&w=400&q=80"
-                    alt="Derma facial"
-                    className="w-full h-full object-cover object-center"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent" />
-                </div>
-              </div>
-            )}
-
-            {/* In-category Promo Banner (Directly from Videos) */}
+          <div id="services-main-content" className="lg:col-span-6 space-y-6">
+            {/* In-category Promo Banner if configured */}
             {activeCategory.promoBanner && (
               <div className="relative rounded-2xl overflow-hidden bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between gap-4 shadow-sm border border-slate-800">
                 <div className="space-y-1 max-w-sm">
@@ -551,6 +469,11 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
                   {activeCategory.promoBanner.startingPrice && (
                     <p className="text-xs font-bold text-amber-300 pt-1">
                       Starting at ₹{activeCategory.promoBanner.startingPrice}
+                      {activeCategory.promoBanner.originalPrice && (
+                        <span className="line-through text-slate-400 font-normal ml-2">
+                          ₹{activeCategory.promoBanner.originalPrice}
+                        </span>
+                      )}
                     </p>
                   )}
                 </div>
@@ -559,6 +482,8 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
                     src={activeCategory.promoBanner.imageUrl}
                     alt={activeCategory.promoBanner.title}
                     className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => handleImageError(e, 'salon')}
                   />
                 </div>
               </div>
@@ -611,7 +536,7 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
               </div>
             )}
 
-            {/* "Make Your Own Package" Interactive Progress Banner (From Videos) */}
+            {/* "Make Your Own Package" Interactive Progress Banner */}
             {activeCategory.id.includes('packages') && (
               <div className="rounded-2xl border border-purple-200/90 bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 p-4 space-y-2.5 shadow-xs">
                 <div className="flex items-center justify-between">
@@ -689,129 +614,270 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
               ) : (
                 displayedServices.map((service) => {
                   const qty = getCartQuantity(service.id);
+                  const isPackage = service.isPackage || service.id.includes('package');
+
                   return (
-                    <div
-                      key={service.id}
-                      className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row items-start justify-between gap-4"
-                    >
-                      {/* Left: Info & Inclusions */}
-                      <div className="space-y-2 flex-1 min-w-0">
-                        {/* Tags */}
-                        {service.tags && service.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {service.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md"
-                              >
-                                {tag}
+                    <React.Fragment key={service.id}>
+                      {/* Secondary In-line Banners matching video */}
+                      {(service.id === 'luxe-roll-on-waxing-arms-legs' || service.id === 'prime-roll-on-waxing') && (
+                        <div
+                          onClick={() => setServiceForOptions(service)}
+                          className="rounded-3xl overflow-hidden bg-[#f7f2ec] border border-amber-200/80 p-5 sm:p-6 flex items-center justify-between gap-4 cursor-pointer hover:border-amber-300 transition-all shadow-xs"
+                        >
+                          <div className="space-y-1">
+                            <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+                              Roll-on
+                              <br />
+                              waxing
+                            </h3>
+                            <p className="text-xs sm:text-sm font-bold text-amber-950/80 pt-1">
+                              Full arms, full legs
+                              <br />
+                              & underarms
+                            </p>
+                          </div>
+                          <div className="w-28 sm:w-36 h-24 sm:h-28 rounded-2xl overflow-hidden shrink-0 border border-white/80 shadow-xs">
+                            <img
+                              src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=400&q=80"
+                              alt="Roll-on waxing"
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => handleImageError(e, 'waxing')}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {(service.id === 'luxe-jp-rice-water' || service.id === 'prime-japanese-matcha-detox') && (
+                        <div
+                          onClick={() => setServiceForOptions(service)}
+                          className="rounded-2xl overflow-hidden bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 text-white p-4 flex items-center justify-between gap-4 border border-emerald-800/40 shadow-xs cursor-pointer hover:border-emerald-600 transition-all"
+                        >
+                          <div>
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                              Japanese Ritual
+                            </span>
+                            <h4 className="text-sm font-black text-white mt-1">
+                              Kyoto Uji Matcha Detox • Mochi Soft Finish
+                            </h4>
+                            <p className="text-xs text-emerald-200/80 mt-0.5">
+                              Organic ceremonial green tea with bronze kansa wand contouring
+                            </p>
+                          </div>
+                          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-white/20">
+                            <img
+                              src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=200&q=80"
+                              alt="Japanese matcha facial"
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => handleImageError(e, 'facial')}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {service.id === 'prime-derma-niacinamide' && (
+                        <div
+                          onClick={() => setServiceForOptions(service)}
+                          className="rounded-2xl overflow-hidden bg-gradient-to-r from-blue-950 to-indigo-950 text-white p-4 flex items-center justify-between gap-4 border border-blue-800/40 shadow-xs cursor-pointer hover:border-blue-700 transition-all"
+                        >
+                          <div>
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-blue-400/20 text-blue-300 border border-blue-400/30">
+                              Clinical Active
+                            </span>
+                            <h4 className="text-sm font-black text-white mt-1">
+                              -5°C Cryofacial Ice Therapy • 10% Niacinamide
+                            </h4>
+                            <p className="text-xs text-blue-200/80 mt-0.5">
+                              Instantly tightens pores & fades dark spots with zero downtime
+                            </p>
+                          </div>
+                          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-white/20">
+                            <img
+                              src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=200&q=80"
+                              alt="Clinical Derma Facial"
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => handleImageError(e, 'facial')}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Main Service Card */}
+                      <div className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row items-start justify-between gap-4 relative">
+                        {/* Left: Info & Inclusions */}
+                        <div className="space-y-2 flex-1 min-w-0">
+                          {/* Badges / Tags */}
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {isPackage && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">
+                                <Package className="w-3 h-3" />
+                                PACKAGE
                               </span>
-                            ))}
+                            )}
+                            {service.isExclusive && (
+                              <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md">
+                                UC EXCLUSIVE
+                              </span>
+                            )}
+                            {service.isBestseller && (
+                              <span className="text-[10px] font-black uppercase text-slate-900 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded-md">
+                                BESTSELLER
+                              </span>
+                            )}
+                            {service.isFreeGift && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-purple-900 bg-purple-100 border border-purple-300 px-2 py-0.5 rounded-md">
+                                <Gift className="w-3 h-3" />
+                                FREE GIFT INCLUDED
+                              </span>
+                            )}
                           </div>
-                        )}
 
-                        <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
-                          {service.title}
-                        </h3>
+                          <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                            {service.title}
+                          </h3>
 
-                        {/* Rating & Reviews */}
-                        <div className="flex items-center gap-2 text-xs text-slate-600">
-                          <div className="flex items-center gap-1 font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
-                            <span>{service.rating}</span>
+                          {/* Rating & Reviews */}
+                          <div className="flex items-center gap-2 text-xs text-slate-600">
+                            <div className="flex items-center gap-1 font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">
+                              <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
+                              <span>{service.rating}</span>
+                            </div>
+                            <span>({(service.reviewCount / 1000).toFixed(1)}K reviews)</span>
                           </div>
-                          <span>({(service.reviewCount / 1000).toFixed(1)}K reviews)</span>
-                        </div>
 
-                        {/* Price & Duration */}
-                        <div className="flex items-baseline gap-2 pt-1">
-                          <span className="text-base sm:text-lg font-black text-slate-900">
-                            ₹{service.price}
-                          </span>
-                          {service.originalPrice && (
-                            <span className="text-xs text-slate-400 line-through">
-                              ₹{service.originalPrice}
+                          {/* Price & Duration */}
+                          <div className="flex items-baseline gap-2 pt-1">
+                            <span className="text-base sm:text-lg font-black text-slate-900">
+                              {service.startsAt ? `Starts at ₹${service.price}` : `₹${service.price}`}
                             </span>
-                          )}
-                          {service.discountPercent && (
-                            <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                              {service.discountPercent}% OFF
+                            {service.originalPrice && (
+                              <span className="text-xs text-slate-400 line-through">
+                                ₹{service.originalPrice}
+                              </span>
+                            )}
+                            {service.discountPercent && (
+                              <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                {service.discountPercent}% OFF
+                              </span>
+                            )}
+                            <span className="text-slate-300">•</span>
+                            <span className="text-xs text-slate-500 flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-slate-400" />
+                              {service.durationMinutes} mins
                             </span>
+                          </div>
+
+                          {/* Inclusions List */}
+                          {service.includes && service.includes.length > 0 && (
+                            <ul className="space-y-1 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                              {service.includes.slice(0, 4).map((item, idx) => (
+                                <li key={idx} className="flex items-start gap-1.5 leading-snug">
+                                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
                           )}
-                          <span className="text-slate-300">•</span>
-                          <span className="text-xs text-slate-500 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-slate-400" />
-                            {service.durationMinutes} mins
-                          </span>
-                        </div>
 
-                        {/* Inclusions List */}
-                        {service.includes && service.includes.length > 0 && (
-                          <ul className="space-y-1 pt-2 border-t border-slate-100 text-xs text-slate-600">
-                            {service.includes.slice(0, 3).map((item, idx) => (
-                              <li key={idx} className="flex items-start gap-1.5 leading-snug">
-                                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-
-                        {/* View Details Link */}
-                        <div className="pt-1">
-                          <button
-                            type="button"
-                            onClick={() => onSelectServiceDetail(service)}
-                            className="text-xs font-bold text-purple-700 hover:text-purple-900 underline cursor-pointer"
-                          >
-                            View details
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Right: Service Image & Add Button */}
-                      <div className="relative shrink-0 flex flex-col items-center w-full sm:w-auto">
-                        <div className="w-full sm:w-32 h-36 sm:h-32 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative">
-                          <img
-                            src={service.image}
-                            alt={service.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                        </div>
-
-                        {/* Add / Quantity Button positioned right under image */}
-                        <div className="-mt-4 relative z-10">
-                          {qty === 0 ? (
+                          {/* Links: Edit package or View details */}
+                          <div className="pt-1 flex items-center gap-4">
+                            {isPackage && (
+                              <button
+                                type="button"
+                                onClick={() => setPackageToEdit(service)}
+                                className="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
+                              >
+                                Edit your package
+                              </button>
+                            )}
                             <button
                               type="button"
-                              onClick={() => onAddToCart(service)}
-                              className="bg-white hover:bg-purple-50 text-purple-700 border-2 border-purple-600 hover:border-purple-700 px-6 py-1.5 rounded-xl font-black text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+                              onClick={() => {
+                                if (service.optionsCount && service.optionsCount > 1) {
+                                  setServiceForOptions(service);
+                                } else {
+                                  onSelectServiceDetail(service);
+                                }
+                              }}
+                              className="text-xs font-bold text-purple-700 hover:text-purple-900 underline cursor-pointer"
                             >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Add</span>
+                              View details
                             </button>
-                          ) : (
-                            <div className="bg-purple-900 text-white rounded-xl flex items-center shadow-lg border border-purple-800">
-                              <button
-                                type="button"
-                                onClick={() => onUpdateCartQuantity(service.id, -1)}
-                                className="p-1.5 hover:bg-white/20 transition-colors rounded-l-xl cursor-pointer"
-                              >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-                              <span className="px-3 text-xs font-black">{qty}</span>
-                              <button
-                                type="button"
-                                onClick={() => onUpdateCartQuantity(service.id, 1)}
-                                className="p-1.5 hover:bg-white/20 transition-colors rounded-r-xl cursor-pointer"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
+                          </div>
+                        </div>
+
+                        {/* Right: Service Image, Discount Pill & Add Button */}
+                        <div className="relative shrink-0 flex flex-col items-center w-full sm:w-auto">
+                          {/* Discount Pill for packages on top right */}
+                          {isPackage && service.discountPercent && (
+                            <div className="self-end mb-1 text-[10px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">
+                              {service.discountPercent}% OFF
                             </div>
                           )}
+
+                          <div className="w-full sm:w-32 h-36 sm:h-32 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative">
+                            <img
+                              src={service.image}
+                              alt={service.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => handleImageError(e, 'salon')}
+                            />
+                          </div>
+
+                          {/* Add / Quantity Button */}
+                          <div className="-mt-4 relative z-10 flex flex-col items-center">
+                            {qty === 0 ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (service.optionsCount && service.optionsCount > 1) {
+                                    setServiceForOptions(service);
+                                  } else {
+                                    onAddToCart(service);
+                                  }
+                                }}
+                                className="bg-white hover:bg-purple-50 text-purple-700 border-2 border-purple-600 hover:border-purple-700 px-6 py-1.5 rounded-xl font-black text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>Add</span>
+                              </button>
+                            ) : (
+                              <div className="bg-purple-900 text-white rounded-xl flex items-center shadow-lg border border-purple-800">
+                                <button
+                                  type="button"
+                                  onClick={() => onUpdateCartQuantity(service.id, -1)}
+                                  className="p-1.5 hover:bg-white/20 transition-colors rounded-l-xl cursor-pointer"
+                                >
+                                  <Minus className="w-3.5 h-3.5" />
+                                </button>
+                                <span className="px-3 text-xs font-black">{qty}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => onUpdateCartQuantity(service.id, 1)}
+                                  className="p-1.5 hover:bg-white/20 transition-colors rounded-r-xl cursor-pointer"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Options count text below Add button */}
+                            {service.optionsCount && (
+                              <button
+                                type="button"
+                                onClick={() => setServiceForOptions(service)}
+                                className="text-[10px] text-slate-500 font-semibold hover:text-purple-700 mt-1 cursor-pointer underline"
+                              >
+                                {service.optionsCount} options
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </React.Fragment>
                   );
                 })
               )}
@@ -819,28 +885,48 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
           </div>
 
           {/* ===================================================================== */}
-          {/* COLUMN 3: RIGHT COLUMN (PROMISES, OFFERS & CART SUMMARY) */}
+          {/* COLUMN 3: RIGHT COLUMN (OFFERS, PROMISES & ACTIVE CART) */}
           {/* ===================================================================== */}
           <div className="lg:col-span-3 lg:sticky lg:top-36 space-y-4">
-            {/* Offer Card */}
+            {/* Offer Card (NEWSALON 25% off) */}
             <div className="bg-gradient-to-br from-purple-900 to-indigo-950 text-white rounded-3xl p-5 shadow-sm space-y-2 border border-purple-800">
-              <span className="text-[10px] font-black uppercase tracking-wider bg-purple-400/20 text-purple-300 border border-purple-300/30 px-2.5 py-0.5 rounded-md inline-block">
-                First Time Special
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-wider bg-purple-400/20 text-purple-300 border border-purple-300/30 px-2.5 py-0.5 rounded-md inline-block">
+                  Exclusive Voucher
+                </span>
+                {couponApplied && (
+                  <span className="text-[10px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-md">
+                    APPLIED
+                  </span>
+                )}
+              </div>
               <h3 className="text-base font-black tracking-tight leading-snug">
-                Get 20% off on first salon booking
+                Get 25% off upto ₹200
               </h3>
-              <p className="text-xs text-purple-200 leading-relaxed">
-                Use code <span className="font-bold text-white bg-purple-800/80 px-1.5 py-0.5 rounded">GLOW20</span> at checkout.
+              <p className="text-xs text-purple-200 leading-relaxed font-medium">
+                Valid on first salon booking with code <strong className="text-white font-bold">NEWSALON</strong>
               </p>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCouponApplied(!couponApplied)}
+                  className={`w-full py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    couponApplied
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                      : 'bg-white hover:bg-slate-100 text-purple-950 shadow-md'
+                  }`}
+                >
+                  {couponApplied ? `✓ Voucher Applied (-₹${couponDiscount})` : 'Apply Code: NEWSALON'}
+                </button>
+              </div>
             </div>
 
-            {/* UrgentLyfe Promise Box matching Video */}
+            {/* UC Promise Box */}
             <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs space-y-3">
               <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
-                  UrgentLyfe Promise
+                  UC Promise
                 </h4>
               </div>
 
@@ -887,9 +973,17 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
               </div>
 
               {totalCartCount === 0 ? (
-                <p className="text-xs text-slate-500 py-3 text-center">
-                  No services added yet. Select a service to get started!
-                </p>
+                <div className="py-6 text-center space-y-2">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                    <ShoppingCart className="w-5 h-5" />
+                  </div>
+                  <p className="text-xs font-semibold text-slate-600">
+                    No items in your cart
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Explore salon services & add them to your cart
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   <div className="max-h-48 overflow-y-auto space-y-2 pr-1 scrollbar-none">
@@ -925,9 +1019,23 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
                     ))}
                   </div>
 
-                  <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700">Subtotal:</span>
-                    <span className="text-base font-black text-slate-900">₹{cartTotal}</span>
+                  <div className="pt-2 border-t border-slate-200 space-y-1">
+                    <div className="flex items-center justify-between text-xs text-slate-600">
+                      <span>Subtotal:</span>
+                      <span className="font-bold text-slate-900">₹{cartSubtotal}</span>
+                    </div>
+
+                    {couponApplied && (
+                      <div className="flex items-center justify-between text-xs text-emerald-700 font-bold">
+                        <span>NEWSALON Voucher:</span>
+                        <span>-₹{couponDiscount}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                      <span className="font-bold text-slate-800">To Pay:</span>
+                      <span className="text-base font-black text-slate-900">₹{finalCartTotal}</span>
+                    </div>
                   </div>
 
                   <button
@@ -956,7 +1064,7 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
             <div className="text-[11px] text-slate-500 font-bold">
               {totalCartCount} items in cart
             </div>
-            <div className="text-base font-black text-slate-900">₹{cartTotal}</div>
+            <div className="text-base font-black text-slate-900">₹{finalCartTotal}</div>
           </div>
           <button
             type="button"
@@ -973,149 +1081,37 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
         </div>
       )}
 
-      {/* ===================================================================== */}
-      {/* 4. INTERACTIVE SHOWCASE MODAL: CRYOFACIAL COLD THERAPY (Video 1, 00:07) */}
-      {/* ===================================================================== */}
-      {isCryoDemoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col">
-            {/* Modal Header */}
-            <div className="relative bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 text-white p-6">
-              <button
-                type="button"
-                onClick={() => setIsCryoDemoOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-
-              <div className="inline-flex items-center gap-1.5 bg-purple-400/20 text-purple-300 border border-purple-300/30 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2">
-                <Sparkles className="w-3 h-3 text-purple-300" />
-                DERMA COLD THERAPY (-5°C) DEMO
-              </div>
-
-              <h3 className="text-xl font-black text-white leading-tight">
-                How Cryofacial Cold Therapy Works
-              </h3>
-              <p className="text-xs text-purple-200/80 mt-1">
-                Targeted actives locked into pores with medical sub-zero cryo-wand
-              </p>
-
-              {/* Quick Science Metrics */}
-              <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-purple-800/60 text-center">
-                <div className="bg-purple-900/40 rounded-xl p-2">
-                  <div className="text-base font-black text-white">-5°C</div>
-                  <div className="text-[10px] text-purple-200">Chilled probe</div>
-                </div>
-                <div className="bg-purple-900/40 rounded-xl p-2">
-                  <div className="text-base font-black text-emerald-300">68%</div>
-                  <div className="text-[10px] text-purple-200">Pore shrinkage</div>
-                </div>
-                <div className="bg-purple-900/40 rounded-xl p-2">
-                  <div className="text-base font-black text-amber-300">0 mins</div>
-                  <div className="text-[10px] text-purple-200">Zero downtime</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Content / 4 Steps */}
-            <div className="p-6 overflow-y-auto space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                4-Step Cryofacial Cold Therapy Sequence
-              </h4>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-purple-50/70 border border-purple-100">
-                  <div className="w-7 h-7 rounded-xl bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <div className="text-xs font-black text-purple-950">
-                      Sonic Deep Cleanse & Extraction
-                    </div>
-                    <div className="text-[11px] text-purple-800/90 leading-snug mt-0.5">
-                      12,000 acoustic oscillations/min loosen oxidized blackheads and dead keratin without squeezing or redness.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-purple-50/70 border border-purple-100">
-                  <div className="w-7 h-7 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <div className="text-xs font-black text-indigo-950">
-                      Ultrasonic Active Infusion
-                    </div>
-                    <div className="text-[11px] text-indigo-800/90 leading-snug mt-0.5">
-                      Medical-grade ultrasound probe drives sterile single-use 10% Niacinamide or 2% Salicylic Acid past the stratum corneum.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-purple-50/70 border border-purple-100">
-                  <div className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <div className="text-xs font-black text-blue-950">
-                      Cryo-Wand (-5°C) Thermal Shock
-                    </div>
-                    <div className="text-[11px] text-blue-800/90 leading-snug mt-0.5">
-                      Chilled titanium wand glides across skin. Instant vasoconstriction contracts dilated pores, locking active serums deep inside.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-purple-50/70 border border-purple-100">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                    4
-                  </div>
-                  <div>
-                    <div className="text-xs font-black text-emerald-950">
-                      Bio-Cellulose Mask & Cryo Ice Globes
-                    </div>
-                    <div className="text-[11px] text-emerald-800/90 leading-snug mt-0.5">
-                      Soothes skin barrier, sculpts cheekbones and jawline, leaving luminous glass-skin texture.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setIsCryoDemoOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCryoDemoOpen(false);
-                  const target = categories.find((c) => c.id === 'prime-derma-facials');
-                  if (target) setActiveCategoryId(target.id);
-                }}
-                className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5"
-              >
-                <span>Explore Derma Facials</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Options Selection Modal */}
+      {serviceForOptions && (
+        <SalonServiceOptionsModal
+          service={serviceForOptions}
+          isOpen={!!serviceForOptions}
+          onClose={() => setServiceForOptions(null)}
+          onSelectOption={(customized) => {
+            onAddToCart(customized);
+          }}
+          cartItems={cartItems}
+          onUpdateCartQuantity={onUpdateCartQuantity}
+        />
       )}
 
-      {/* ===================================================================== */}
-      {/* 5. INTERACTIVE SHOWCASE MODAL: FOREST ESSENTIALS 24K GOLD (Video 2, 00:09) */}
-      {/* ===================================================================== */}
+      {/* Package Customization Modal */}
+      {packageToEdit && (
+        <SalonEditPackageModal
+          service={packageToEdit}
+          isOpen={!!packageToEdit}
+          onClose={() => setPackageToEdit(null)}
+          onSavePackage={(customized) => {
+            onAddToCart(customized);
+            setPackageToEdit(null);
+          }}
+        />
+      )}
+
+      {/* Interactive Video Showcase: Forest Essentials */}
       {isGoldRitualOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col">
-            {/* Modal Header */}
             <div className="relative bg-gradient-to-r from-amber-950 via-stone-900 to-slate-950 text-white p-6">
               <button
                 type="button"
@@ -1137,7 +1133,6 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
                 Pure 24K gold bhasma, Kashmiri saffron & Ayurvedic kansa wand facial marma lift
               </p>
 
-              {/* Quick Ayurvedic Highlights */}
               <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-amber-800/60 text-center">
                 <div className="bg-amber-900/30 rounded-xl p-2">
                   <div className="text-base font-black text-amber-200">24 Karat</div>
@@ -1154,7 +1149,6 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
               </div>
             </div>
 
-            {/* Modal Content / 4 Steps */}
             <div className="p-6 overflow-y-auto space-y-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 4-Step Ayurvedic Royal Journey
@@ -1219,7 +1213,6 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
               <button
                 type="button"
@@ -1232,8 +1225,8 @@ export const SalonWomenCategoryView: React.FC<SalonWomenCategoryViewProps> = ({
                 type="button"
                 onClick={() => {
                   setIsGoldRitualOpen(false);
-                  const target = categories.find((c) => c.id === 'luxe-forest-essentials');
-                  if (target) setActiveCategoryId(target.id);
+                  const target = categories.find((c) => c.id.includes('forest-essentials'));
+                  if (target) handleCategorySelect(target.id);
                 }}
                 className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-5 py-2 rounded-xl text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5"
               >

@@ -61,11 +61,11 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
     bannerTag: 'NEW LAUNCH: DERMA FACIALS',
     bannerHeadline: 'Niacinamide + Cryofacial Cold Therapy (-5°C)',
     bannerSubtitle: 'Targeted depigmentation actives locked into pores with medical cryo-wand',
-    bannerImage: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=600&auto=format&fit=crop&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&auto=format&fit=crop&q=80',
     idealFor: [
       {
         title: 'Stubborn sun spots & post-acne blemishes',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80',
       },
       {
         title: 'Open enlarged pores & uneven skin tone',
@@ -84,7 +84,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
       {
         title: 'Ultrasonic active transdermal infusion',
         description: 'High-frequency acoustic vibrations push medical-grade Niacinamide serum deep into dermal layers.',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80',
       },
       {
         title: 'Cryofacial -5°C thermal lock & lymphatic drainage',
@@ -101,7 +101,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
         step: 1,
         title: 'Double cleanse & enzyme exfoliation',
         description: 'Salicylic-infused foam removes dead stratum corneum and clears sebum blockages.',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80',
       },
       {
         step: 2,
@@ -119,7 +119,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
         step: 4,
         title: 'Cryofacial Cold Therapy Probe (-5°C)',
         description: 'Chilled titanium wand glides over face to constrict pores and seal active serum.',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80',
       },
       {
         step: 5,
@@ -130,7 +130,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
     ],
     setupTitle: 'Derma Medical Machine & Sealed Monodose Kit',
     setupDimensions: 'Cryofacial -5°C Wand + Sealed Monodose Kit + Sanitized Headband & Capes',
-    setupImage: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=500&auto=format&fit=crop&q=80',
+    setupImage: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&auto=format&fit=crop&q=80',
     expertBadgeTitle: 'Certified Clinical Aesthetician',
     expertPoints: [
       'CIDESCO / CIBTAC trained clinical aesthetician with 500+ supervised facial hours',
@@ -216,7 +216,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
         step: 2,
         title: 'Kashmiri Walnut & Sandalwood Gommage',
         description: 'Crushed walnut kernels polish texture without micro-tears, followed by rose hydrosol steam.',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80',
       },
       {
         step: 3,
@@ -813,7 +813,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
       },
       {
         title: 'Bridal glow & pre-festive preparation',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&auto=format&fit=crop&q=80',
       },
     ],
     whenToAvoid: [
@@ -865,7 +865,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
         step: 4,
         title: 'Deep hydration body butter finish',
         description: 'Locks in moisture leaving skin baby-soft for days.',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&auto=format&fit=crop&q=80',
       },
     ],
     setupTitle: 'Mess-free spa bed with disposable sheet',
@@ -1249,7 +1249,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
       },
       {
         title: 'Hair follicle nourishment & scalp stress',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&auto=format&fit=crop&q=80',
       },
     ],
     whenToAvoid: [
@@ -1265,7 +1265,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
       {
         title: 'Circular acupressure scalp stimulation',
         description: 'Fingertip circular motions stimulate blood flow to hair roots and soothe cranial nerves.',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&auto=format&fit=crop&q=80',
       },
     ],
     focusZones: [
@@ -1283,7 +1283,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
         step: 1,
         title: 'Warm Brahmi oil scalp infusion',
         description: 'Warm herbal oil parted into hair sections and massaged deeply into scalp.',
-        image: 'https://images.unsplash.com/photo-1512290900672-1f41d911b306?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&auto=format&fit=crop&q=80',
       },
       {
         step: 2,
