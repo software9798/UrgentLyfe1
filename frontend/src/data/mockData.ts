@@ -1,5 +1,8 @@
 import { Category, ServiceItem, Partner, City, Coupon, Booking } from '../types';
 import { ALL_SALON_SERVICES } from './salonData';
+import { SPA_SERVICES } from './spaData';
+import { HAIR_STUDIO_SERVICES } from './hairStudioData';
+import { MAKEUP_SERVICES } from './makeupData';
 
 export const CITIES: City[] = [
   {
@@ -285,6 +288,24 @@ export const CATEGORIES: Category[] = [
     serviceCount: 18,
   },
   {
+    id: 'hair-studio-women',
+    name: 'Hair Studio for Women',
+    slug: 'hair-studio-for-women',
+    icon: 'Scissors',
+    description: 'Haircuts, Blow-dry, Keratin, Botox, Highlights & Hair Care (Starts ₹349)',
+    popular: true,
+    serviceCount: 20,
+  },
+  {
+    id: 'makeup-saree-styling',
+    name: 'Makeup, Saree & Styling',
+    slug: 'makeup-saree-styling',
+    icon: 'Sparkles',
+    description: 'Party makeup, Saree draping, Wedding combos, Hairstyling & Add-ons (Starts ₹159)',
+    popular: true,
+    serviceCount: 18,
+  },
+  {
     id: 'salon',
     name: 'Salon for Women',
     slug: 'salon',
@@ -315,6 +336,7 @@ export const CATEGORIES: Category[] = [
 
 export const SERVICES: ServiceItem[] = [
   ...ALL_SALON_SERVICES,
+  ...MAKEUP_SERVICES,
   {
     id: 'ac-foam-jet-service',
     categoryId: 'ac-appliance',
@@ -3866,6 +3888,7 @@ export const SERVICES: ServiceItem[] = [
       { step: 4, title: 'Scalp & Shoulder Acupressure', desc: 'Relaxing massage and finishing with non-sticky shine serum', duration: '17 mins', tool: 'Nourishing Hair Serum' },
     ],
   },
+  ...HAIR_STUDIO_SERVICES,
 ];
 
 export const PARTNERS: Partner[] = [

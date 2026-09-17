@@ -898,7 +898,7 @@ export const SALON_PRIME_CATEGORIES: SalonSubCategory[] = [
     name: 'Super saver packages',
     iconName: 'Package',
     image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=200&q=80',
-    badge: '20% OFF',
+    badge: 'Upto 20% OFF',
     badgeColor: 'bg-rose-100 text-rose-700',
     services: SALON_PRIME_SERVICES.filter((s) => s.id.includes('prime-pkg')),
   },
@@ -922,22 +922,6 @@ export const SALON_PRIME_CATEGORIES: SalonSubCategory[] = [
     ),
   },
   {
-    id: 'prime-derma-facials',
-    name: 'Derma facials',
-    iconName: 'Zap',
-    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=200&q=80',
-    badge: 'New',
-    badgeColor: 'bg-purple-100 text-purple-700',
-    promoBanner: {
-      title: 'Niacinamide depigment derma facial',
-      subtitle: 'Targeted actives, powered by Cryofacial Cold Therapy',
-      badge: 'New launch',
-      imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80',
-      startingPrice: 1599,
-    },
-    services: SALON_PRIME_SERVICES.filter((s) => s.id.includes('prime-derma')),
-  },
-  {
     id: 'prime-japanese-rituals',
     name: 'Japanese rituals',
     iconName: 'Flower2',
@@ -947,6 +931,7 @@ export const SALON_PRIME_CATEGORIES: SalonSubCategory[] = [
     promoBanner: {
       title: 'A deep Matcha detox for your skin',
       subtitle: 'Ceremonial grade Uji Matcha & fermented rice essence',
+      badge: 'New launch',
       imageUrl: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
       startingPrice: 1399,
     },
@@ -961,9 +946,11 @@ export const SALON_PRIME_CATEGORIES: SalonSubCategory[] = [
       title: 'Korean glass hydration facial',
       subtitle: 'Multi-step K-Beauty routine with Centella & Peptides',
       imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80',
-      startingPrice: 749,
+      startingPrice: 1399,
     },
-    services: SALON_PRIME_SERVICES.filter((s) => s.id.includes('prime-korean')),
+    services: SALON_PRIME_SERVICES.filter(
+      (s) => s.id.includes('prime-korean') || s.id.includes('prime-derma')
+    ),
   },
   {
     id: 'prime-signature-facial-cleanup',
@@ -972,10 +959,13 @@ export const SALON_PRIME_CATEGORIES: SalonSubCategory[] = [
     image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=200&q=80',
     services: SALON_PRIME_SERVICES.filter(
       (s) =>
+        s.id.includes('aroma-magic') ||
+        s.id.includes('sara-lightening') ||
         s.id.includes('o3-shine') ||
         s.id.includes('power-brightening') ||
         s.id.includes('wine-glow') ||
         s.id.includes('kumkumadi') ||
+        s.id.includes('power-glow-cleanup') ||
         s.id.includes('fruit-cleanup') ||
         s.id.includes('tan-brightening-cleanup')
     ),
@@ -993,6 +983,7 @@ export const SALON_PRIME_CATEGORIES: SalonSubCategory[] = [
     },
     services: SALON_PRIME_SERVICES.filter(
       (s) =>
+        s.id.includes('prime-essential-mani-pedi') ||
         s.id.includes('pedicure') ||
         s.id.includes('manicure') ||
         s.id.includes('cut-file-polish')
@@ -1005,6 +996,7 @@ export const SALON_PRIME_CATEGORIES: SalonSubCategory[] = [
     image: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=200&q=80',
     services: SALON_PRIME_SERVICES.filter(
       (s) =>
+        s.id.includes('prime-hair-colour') ||
         s.id.includes('prime-detan') ||
         s.id.includes('prime-bleach') ||
         s.id.includes('prime-head-massage')

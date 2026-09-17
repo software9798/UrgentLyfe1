@@ -1141,6 +1141,71 @@ export default function App() {
         }}
         onSelectCategoryItem={(categoryTitle) => {
           setIsSalonDermaModalOpen(false);
+          const isSpa =
+            categoryTitle === 'Spa for Women' ||
+            categoryTitle === 'spa-women' ||
+            categoryTitle.toLowerCase().includes('spa');
+
+          if (isSpa) {
+            const spaCat = categories.find((c) => c.id === 'spa-women') || {
+              id: 'spa-women',
+              name: 'Spa for Women',
+              slug: 'spa-for-women',
+              icon: 'Sparkles',
+              description: 'Massage Therapy for Women',
+              popular: true,
+              serviceCount: 16,
+            };
+            setActiveCategoryInitialSubService(undefined);
+            setActiveCategoryPageView(spaCat);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+
+          const isHairStudio =
+            categoryTitle === 'Hair Studio for Women' ||
+            categoryTitle === 'hair-studio-women' ||
+            categoryTitle.toLowerCase().includes('hair studio');
+
+          if (isHairStudio) {
+            const hairCat = categories.find((c) => c.id === 'hair-studio-women') || {
+              id: 'hair-studio-women',
+              name: 'Hair Studio for Women',
+              slug: 'hair-studio-for-women',
+              icon: 'Scissors',
+              description: 'Haircuts, Blow-dry, Keratin & Color',
+              popular: true,
+              serviceCount: 20,
+            };
+            setActiveCategoryInitialSubService(undefined);
+            setActiveCategoryPageView(hairCat);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+
+          const isMakeup =
+            categoryTitle === 'Makeup, Saree & Styling' ||
+            categoryTitle === 'makeup-saree-styling' ||
+            categoryTitle.toLowerCase().includes('makeup') ||
+            categoryTitle.toLowerCase().includes('saree') ||
+            categoryTitle.toLowerCase().includes('styling');
+
+          if (isMakeup) {
+            const makeupCat = categories.find((c) => c.id === 'makeup-saree-styling') || {
+              id: 'makeup-saree-styling',
+              name: 'Makeup, Saree & Styling',
+              slug: 'makeup-saree-styling',
+              icon: 'Sparkles',
+              description: 'Party makeup, Saree draping, Wedding combos, Hairstyling & Add-ons',
+              popular: true,
+              serviceCount: 18,
+            };
+            setActiveCategoryInitialSubService(undefined);
+            setActiveCategoryPageView(makeupCat);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+
           const salonCat = categories.find((c) => c.id === 'salon');
           if (salonCat) {
             setActiveCategoryInitialSubService(categoryTitle);

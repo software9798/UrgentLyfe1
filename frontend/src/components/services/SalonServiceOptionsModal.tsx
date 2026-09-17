@@ -679,6 +679,42 @@ export const SalonServiceOptionsModal: React.FC<SalonServiceOptionsModalProps> =
       ];
     }
 
+    // 10b. PRIME: Bikini waxing (2 options from video)
+    if (service.id === 'prime-bikini-waxing') {
+      return [
+        {
+          id: 'prime-bw-rica-peeloff',
+          name: 'Bikini Wax (RICA Peel-off)',
+          brand: 'RICA Italy',
+          rating: 4.89,
+          reviews: '92K reviews',
+          description: 'Stripless, non-sticky & anti-irritant peel-off wax for intimate area. Applied using wooden spatula, followed by gentle hair removal.',
+          price: 949,
+          originalPrice: 1199,
+          durationMinutes: 30,
+          theme: 'gold',
+          tag: 'Most Popular',
+          keyIngredients: 'Titanium Dioxide & Zinc Oxide',
+          keyBenefit: 'Colophony-free, minimal pain & no irritation',
+        },
+        {
+          id: 'prime-bw-honey-stripless',
+          name: 'Bikini Wax (Gentle Honey Strip)',
+          brand: 'Salon Prime',
+          rating: 4.86,
+          reviews: '54K reviews',
+          description: 'Traditional warm honey formulation with single-use sanitary strips. Post-wax cooling soothing lotion included.',
+          price: 649,
+          originalPrice: 849,
+          durationMinutes: 25,
+          theme: 'gold',
+          tag: 'Value Choice',
+          keyIngredients: 'Natural Beeswax & Honey',
+          keyBenefit: 'Quick hair removal from roots',
+        },
+      ];
+    }
+
     // 11. PRIME: Underarms waxing
     if (service.id === 'prime-underarms-waxing') {
       return [
@@ -1192,6 +1228,72 @@ export const SalonServiceOptionsModal: React.FC<SalonServiceOptionsModalProps> =
           tag: 'Cracked Heel Care',
           keyIngredients: 'Lactic Acid & Shea Butter Heel Balm',
           keyBenefit: 'Eliminates hard calluses & cracks',
+        },
+      ];
+    }
+
+    // 21b. PRIME: Essential Mani-Pedi combo (2 options from video)
+    if (service.id === 'prime-essential-mani-pedi-combo') {
+      return [
+        {
+          id: 'prime-emp-classic',
+          name: 'Essential Mani-Pedi Combo (Classic)',
+          description: 'Essential manicure and pedicure combo for effective hand & foot grooming, cuticle care and nail shaping.',
+          price: 1359,
+          originalPrice: 1599,
+          durationMinutes: 75,
+          rating: 4.81,
+          reviews: '18K reviews',
+          theme: 'rose',
+          tag: 'Save ₹240',
+          keyIngredients: 'Dead Sea Salt & Cuticle Nourishment',
+          keyBenefit: 'Hand & foot rejuvenation',
+        },
+        {
+          id: 'prime-emp-kojic',
+          name: 'Essential Mani-Pedi with Kojic Brightening Pack',
+          description: 'Includes Kojic Acid de-tan pack for hands & feet with deep heel buffing and intense hydration.',
+          price: 1599,
+          originalPrice: 1899,
+          durationMinutes: 90,
+          rating: 4.88,
+          reviews: '26K reviews',
+          theme: 'rose',
+          tag: 'Recommended',
+          keyIngredients: 'Kojic Acid & Milk Protein',
+          keyBenefit: 'Removes tan & brightens skin tone',
+        },
+      ];
+    }
+
+    // 21c. PRIME: Hair colour / mehendi (2 options from video)
+    if (service.id === 'prime-hair-colour-mehendi') {
+      return [
+        {
+          id: 'prime-hcm-roots',
+          name: 'Hair Colour / Mehendi - Root Touch-up Application',
+          description: 'Covers root area up to 2 inches. Professional sectioning and even brush application. (Please keep your colour/mehendi mix ready)',
+          price: 299,
+          originalPrice: 399,
+          durationMinutes: 30,
+          rating: 4.81,
+          reviews: '180K reviews',
+          theme: 'amber',
+          tag: 'Starts at ₹299',
+          keyBenefit: 'Neat root coverage without scalp staining',
+        },
+        {
+          id: 'prime-hcm-global',
+          name: 'Hair Colour / Mehendi - Global Full Hair Application',
+          description: 'Covers full hair length from roots to ends with neat protective wrap and ear/neck shields. (Please keep your colour/mehendi mix ready)',
+          price: 499,
+          originalPrice: 649,
+          durationMinutes: 45,
+          rating: 4.86,
+          reviews: '92K reviews',
+          theme: 'amber',
+          tag: 'Full Length',
+          keyBenefit: 'Complete global coverage with zero mess',
         },
       ];
     }

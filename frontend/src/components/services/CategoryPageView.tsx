@@ -25,6 +25,9 @@ import { Category, ServiceItem, CartItem } from '../../types';
 import { handleImageError } from '../../utils/imageFallback';
 import { ServiceVideoPlayer } from './ServiceVideoPlayer';
 import { SalonWomenCategoryView } from './SalonWomenCategoryView';
+import { SpaWomenCategoryView } from './SpaWomenCategoryView';
+import { HairStudioCategoryView } from './HairStudioCategoryView';
+import { MakeupStylingCategoryView } from './MakeupStylingCategoryView';
 
 interface SubServiceConfig {
   id: string;
@@ -1235,6 +1238,75 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
       );
     }
   };
+
+  // If category is Makeup, Saree & Styling, render the dedicated MakeupStylingCategoryView matching the video
+  if (
+    category.id === 'makeup-saree-styling' ||
+    category.id === 'makeup' ||
+    category.id === 'saree-draping' ||
+    category.slug === 'makeup-saree-styling' ||
+    category.name.toLowerCase().includes('makeup') ||
+    category.name.toLowerCase().includes('saree') ||
+    category.name.toLowerCase().includes('styling')
+  ) {
+    return (
+      <MakeupStylingCategoryView
+        cartItems={cartItems}
+        onAddToCart={onAddToCart}
+        onUpdateCartQuantity={onUpdateCartQuantity}
+        onBookNow={onBookNow}
+        onSelectServiceDetail={onSelectServiceDetail}
+        onClose={onClose}
+        selectedCityName={selectedCityName}
+        selectedLocality={selectedLocality}
+      />
+    );
+  }
+
+  // If category is Hair Studio for Women, render the dedicated HairStudioCategoryView matching the video
+  if (
+    category.id === 'hair-studio-women' ||
+    category.id === 'hair-studio' ||
+    category.id === 'hair-studio-for-women' ||
+    category.slug === 'hair-studio-for-women' ||
+    category.name.toLowerCase().includes('hair studio')
+  ) {
+    return (
+      <HairStudioCategoryView
+        cartItems={cartItems}
+        onAddToCart={onAddToCart}
+        onUpdateCartQuantity={onUpdateCartQuantity}
+        onBookNow={onBookNow}
+        onSelectServiceDetail={onSelectServiceDetail}
+        onClose={onClose}
+        selectedCityName={selectedCityName}
+        selectedLocality={selectedLocality}
+      />
+    );
+  }
+
+  // If category is Spa for Women, render the dedicated SpaWomenCategoryView matching the video
+  if (
+    category.id === 'spa-women' ||
+    category.id === 'spa' ||
+    category.id === 'spa-for-women' ||
+    category.slug === 'spa-for-women' ||
+    category.name.toLowerCase().includes('spa for women') ||
+    category.name.toLowerCase().includes('massage therapy for women')
+  ) {
+    return (
+      <SpaWomenCategoryView
+        cartItems={cartItems}
+        onAddToCart={onAddToCart}
+        onUpdateCartQuantity={onUpdateCartQuantity}
+        onBookNow={onBookNow}
+        onSelectServiceDetail={onSelectServiceDetail}
+        onClose={onClose}
+        selectedCityName={selectedCityName}
+        selectedLocality={selectedLocality}
+      />
+    );
+  }
 
   // If category is Salon for Women, render the dedicated SalonWomenCategoryView matching both videos
   if (

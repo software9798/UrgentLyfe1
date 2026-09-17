@@ -315,7 +315,7 @@ export const SALON_LUXE_SERVICES: ServiceItem[] = [
       'Complimentary Panchamrut facial mist & nourishing lip balm',
     ],
     image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80',
-    tags: ['UC EXCLUSIVE', 'Forest Essentials'],
+    tags: ['UrgentLyfe EXCLUSIVE', 'Forest Essentials'],
   },
   {
     id: 'luxe-forest-sundari-desi-gulab',
@@ -333,7 +333,7 @@ export const SALON_LUXE_SERVICES: ServiceItem[] = [
       'Complimentary rosewater facial mist & nourishing lip balm',
     ],
     image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80',
-    tags: ['UC EXCLUSIVE', 'Forest Essentials'],
+    tags: ['UrgentLyfe EXCLUSIVE', 'Forest Essentials'],
   },
   {
     id: 'luxe-forest-varuna-neem',
@@ -351,7 +351,7 @@ export const SALON_LUXE_SERVICES: ServiceItem[] = [
       'Complimentary Mogra facial mist & nourishing lip balm',
     ],
     image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
-    tags: ['UC EXCLUSIVE', 'Forest Essentials'],
+    tags: ['UrgentLyfe EXCLUSIVE', 'Forest Essentials'],
   },
 
   // ==========================================================================

@@ -108,6 +108,7 @@ export interface ServiceItem {
   isExclusive?: boolean;
   isBestseller?: boolean;
   isFreeGift?: boolean;
+  badge?: string;
 }
 
 export interface CartItem {

@@ -67,7 +67,7 @@ export const SalonDermaModal: React.FC<SalonDermaModalProps> = ({
       visual: HairStudioVisual,
     },
     {
-      id: 'makeup-styling',
+      id: 'makeup-saree-styling',
       label: 'Makeup, Saree & Styling',
       visual: MakeupStylingVisual,
     },
@@ -104,7 +104,7 @@ export const SalonDermaModal: React.FC<SalonDermaModalProps> = ({
         {/* Floating White Circular Button with dark 'X' in the top-right corner (matches video & screenshot) */}
         <div
           className={`w-full flex justify-end mb-3 sm:mb-4 ${
-            currentStep === 'categories' ? 'max-w-[720px]' : 'max-w-[540px]'
+            currentStep === 'categories' ? 'max-w-[760px]' : 'max-w-[540px]'
           } transition-all duration-300`}
         >
           <button
@@ -123,7 +123,7 @@ export const SalonDermaModal: React.FC<SalonDermaModalProps> = ({
         {currentStep === 'categories' ? (
           <div
             id="categories-selection-card"
-            className="w-full max-w-[720px] bg-white rounded-[28px] sm:rounded-[36px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] p-6 sm:p-8 md:p-9 border border-slate-100 transition-all duration-300 animate-in fade-in zoom-in-95"
+            className="w-full max-w-[760px] bg-white rounded-[28px] sm:rounded-[36px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] p-6 sm:p-8 md:p-9 border border-slate-100 transition-all duration-300 animate-in fade-in zoom-in-95"
           >
             {/* Prominent, Bold Heading: "Women's Salon & Spa" */}
             <h2
@@ -133,7 +133,7 @@ export const SalonDermaModal: React.FC<SalonDermaModalProps> = ({
               Women's Salon & Spa
             </h2>
 
-            {/* 4-column horizontal grid of rounded cards */}
+            {/* 4-column horizontal grid of rounded cards matching video 00:00-00:01 */}
             <div className="grid grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
               {categories.map((cat) => {
                 const Visual = cat.visual;
