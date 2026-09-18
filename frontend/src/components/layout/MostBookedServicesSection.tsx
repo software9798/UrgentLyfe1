@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { ChevronRight, ChevronLeft, Star, Zap, Flame, MapPin, Check, Plus, ShieldCheck, Clock } from 'lucide-react';
 import { City, ServiceItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 export interface MostBookedServiceConfig {
   id: string;
@@ -501,6 +502,7 @@ export const MostBookedServicesSection: React.FC<MostBookedServicesSectionProps>
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover object-center group-hover/card:scale-105 transition-transform duration-500"
                       loading="lazy"
+                      onError={(e) => handleImageError(e, item.categoryId || 'service')}
                     />
 
                     {/* Subtle Area High-Demand Tag Top-Left */}

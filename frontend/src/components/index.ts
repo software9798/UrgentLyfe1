@@ -23,6 +23,7 @@ export * from './services/CategoryGrid';
 export * from './services/CategoryPageView';
 export * from './services/SalonWomenCategoryView';
 export * from './services/SalonDermaModal';
+export * from './services/MensSalonMassageModal';
 export * from './services/SalonCategoryVisuals';
 export * from './services/SalonMenPreferenceModal';
 export * from './services/SalonMenCategoryView';

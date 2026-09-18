@@ -28,6 +28,8 @@ import { SalonWomenCategoryView } from './SalonWomenCategoryView';
 import { SpaWomenCategoryView } from './SpaWomenCategoryView';
 import { HairStudioCategoryView } from './HairStudioCategoryView';
 import { MakeupStylingCategoryView } from './MakeupStylingCategoryView';
+import { SalonMenCategoryView } from './SalonMenCategoryView';
+import { MassageMenCategoryView } from './MassageMenCategoryView';
 
 interface SubServiceConfig {
   id: string;
@@ -69,6 +71,7 @@ interface CategoryPageViewProps {
   onSelectServiceDetail: (service: ServiceItem) => void;
   onClose: () => void;
   onSelectOtherCategory: (category: Category, subServiceKey?: string) => void;
+  onOpenPreferenceModal?: () => void;
   selectedCityName: string;
   selectedLocality: string;
 }
@@ -85,6 +88,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
   onSelectServiceDetail,
   onClose,
   onSelectOtherCategory,
+  onOpenPreferenceModal,
   selectedCityName,
   selectedLocality,
 }) => {
@@ -275,14 +279,14 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
             {
               id: 'ro-water-purifier',
               label: 'RO Purifier Service',
-              thumbnailUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&w=200&q=80',
+              thumbnailUrl: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=200&q=80',
               promoBanner: {
                 badge: 'Pure Water',
                 title: 'RO Water Purifier Check & Filter Flush',
                 price: 399,
                 originalPrice: 599,
                 subtitle: 'Digital TDS check, UV lamp check & booster pump test',
-                image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&w=400&q=80',
+                image: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=400&q=80',
               },
               filterServiceIds: ['ro-water-purifier-repair', 'ro-water-purifier-native-m3'],
             },
@@ -838,7 +842,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
                 price: 399,
                 originalPrice: 599,
                 subtitle: 'Filter check, membrane flush & TDS water testing',
-                image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&w=400&q=80',
+                image: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=400&q=80',
               },
               filterServiceIds: ['ro-water-purifier-repair', 'ro-water-purifier-native-m3'],
             },
@@ -1335,6 +1339,55 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
         onBookNow={onBookNow}
         onSelectServiceDetail={onSelectServiceDetail}
         onClose={onClose}
+        selectedCityName={selectedCityName}
+        selectedLocality={selectedLocality}
+      />
+    );
+  }
+
+  // If category is Men's Salon & Massage, render SalonMenCategoryView
+  if (
+    category.id === 'salon-men' ||
+    category.id === 'men-salon' ||
+    category.id === 'massage-men' ||
+    category.id === 'massage-for-men'
+  ) {
+    const isPrime =
+      initialSubService === 'prime' ||
+      initialSubService?.toLowerCase().includes('prime');
+    const isMassage =
+      category.id === 'massage-men' ||
+      category.id === 'massage-for-men' ||
+      initialSubService === 'massage' ||
+      initialSubService === 'massage-men' ||
+      initialSubService?.toLowerCase().includes('massage');
+
+    if (isMassage) {
+      return (
+        <MassageMenCategoryView
+          cartItems={cartItems}
+          onAddToCart={onAddToCart}
+          onUpdateCartQuantity={onUpdateCartQuantity}
+          onBookNow={onBookNow}
+          onSelectServiceDetail={onSelectServiceDetail}
+          onClose={onClose}
+          selectedCityName={selectedCityName}
+          selectedLocality={selectedLocality}
+        />
+      );
+    }
+
+    return (
+      <SalonMenCategoryView
+        initialTier={isPrime ? 'prime' : 'royale'}
+        initialFilter="all"
+        cartItems={cartItems}
+        onAddToCart={onAddToCart}
+        onUpdateCartQuantity={onUpdateCartQuantity}
+        onBookNow={onBookNow}
+        onSelectServiceDetail={onSelectServiceDetail}
+        onClose={onClose}
+        onOpenPreferenceModal={onOpenPreferenceModal}
         selectedCityName={selectedCityName}
         selectedLocality={selectedLocality}
       />

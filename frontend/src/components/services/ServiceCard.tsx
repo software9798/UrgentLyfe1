@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Clock, Zap, CheckCircle2, ChevronRight, ArrowRightLeft, Check, Plus, Minus, ShoppingBag, Play } from 'lucide-react';
 import { ServiceItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface ServiceCardProps {
   service: ServiceItem;
@@ -39,6 +40,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
           referrerPolicy="no-referrer"
+          onError={(e) => handleImageError(e, service.categoryId)}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
 

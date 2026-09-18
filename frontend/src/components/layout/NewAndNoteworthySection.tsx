@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { handleImageError } from '../../utils/imageFallback';
 
 export interface NoteworthyItem {
   id: string;
@@ -178,6 +179,7 @@ export const NewAndNoteworthySection: React.FC<NewAndNoteworthySectionProps> = (
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover object-center"
                     loading="lazy"
+                    onError={(e) => handleImageError(e, item.categoryId || 'service')}
                   />
 
                   {/* Optional "New" Badge (Screenshot 1) */}

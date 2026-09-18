@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { City, User, ProviderProfile, ServiceItem, Category } from '../../types';
 import { searchServices } from '../../utils/searchHelper';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface NavbarProps {
   cities: City[];
@@ -391,6 +392,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                                 alt={srv.title}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 referrerPolicy="no-referrer"
+                                onError={(e) => handleImageError(e, srv.categoryId || 'service')}
                               />
                               {hasFreeCheck && (
                                 <span className="absolute top-1 left-1 bg-emerald-800 text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs leading-tight">
@@ -681,6 +683,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         src={srv.image}
                         alt={srv.title}
                         className="w-12 h-12 rounded-lg object-cover shrink-0"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => handleImageError(e, srv.categoryId || 'service')}
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-slate-900 truncate">

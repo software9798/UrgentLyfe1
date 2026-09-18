@@ -357,3 +357,206 @@ export const MakeupStylingVisual: React.FC<{ className?: string }> = ({
     <line x1="47" y1="28" x2="47" y2="39" stroke="#fda4af" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
   </svg>
 );
+
+// 5. Salon for Men (Male avatar with facial mask, cucumber eye slices, white spa robe)
+export const SalonForMenVisual: React.FC<{ className?: string }> = ({
+  className = 'w-16 h-16',
+}) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <defs>
+      <radialGradient id="sfmGlow" cx="50%" cy="45%" r="50%">
+        <stop offset="0%" stopColor="#e0e7ff" stopOpacity="0.8" />
+        <stop offset="70%" stopColor="#eef2ff" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#eef2ff" stopOpacity="0" />
+      </radialGradient>
+      <radialGradient id="sfmSkin" cx="48%" cy="38%" r="60%">
+        <stop offset="0%" stopColor="#ffedd5" />
+        <stop offset="40%" stopColor="#fed7aa" />
+        <stop offset="80%" stopColor="#fdba74" />
+        <stop offset="100%" stopColor="#fb923c" />
+      </radialGradient>
+      <linearGradient id="sfmHair" x1="30" y1="14" x2="70" y2="34" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#451a03" />
+        <stop offset="40%" stopColor="#291102" />
+        <stop offset="100%" stopColor="#1a0a01" />
+      </linearGradient>
+      <linearGradient id="sfmRobe" x1="50" y1="68" x2="50" y2="96" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#ffffff" />
+        <stop offset="70%" stopColor="#f8fafc" />
+        <stop offset="100%" stopColor="#e2e8f0" />
+      </linearGradient>
+      <radialGradient id="sfmCuke" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stopColor="#dcfce7" />
+        <stop offset="50%" stopColor="#86efac" />
+        <stop offset="100%" stopColor="#16a34a" />
+      </radialGradient>
+      <radialGradient id="sfmShadow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#0f172a" stopOpacity="0.25" />
+        <stop offset="100%" stopColor="#0f172a" stopOpacity="0" />
+      </radialGradient>
+    </defs>
+
+    {/* Drop shadow */}
+    <ellipse cx="50" cy="94" rx="34" ry="4" fill="url(#sfmShadow)" />
+
+    {/* White Spa Robe & Shoulders */}
+    <path
+      d="M20 95 C20 76 32 68 43 65 L50 78 L57 65 C68 68 80 76 80 95 Z"
+      fill="url(#sfmRobe)"
+      stroke="#cbd5e1"
+      strokeWidth="1"
+    />
+    {/* V-neck robe collar folds */}
+    <path d="M40 66 L50 82 L60 66" stroke="#94a3b8" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+    <path d="M50 82 V95" stroke="#cbd5e1" strokeWidth="1" />
+
+    {/* Neck */}
+    <rect x="44.5" y="52" width="11" height="15" rx="4" fill="#fdba74" />
+
+    {/* Ears */}
+    <circle cx="34" cy="45" r="4.2" fill="#fdba74" />
+    <circle cx="34" cy="45" r="2.2" fill="#fb923c" opacity="0.6" />
+    <circle cx="66" cy="45" r="4.2" fill="#fdba74" />
+    <circle cx="66" cy="45" r="2.2" fill="#fb923c" opacity="0.6" />
+
+    {/* Head base */}
+    <ellipse cx="50" cy="44" rx="15" ry="17" fill="url(#sfmSkin)" />
+
+    {/* Well-groomed Hair */}
+    <path
+      d="M35 36 C34 22 41 15 50 15 C59 15 66 22 65 36 C63 30 58 24 50 24 C42 24 37 29 35 36 Z"
+      fill="url(#sfmHair)"
+    />
+    {/* Sideburns */}
+    <rect x="34.5" y="34" width="2.5" height="8" rx="1" fill="url(#sfmHair)" />
+    <rect x="63" y="34" width="2.5" height="8" rx="1" fill="url(#sfmHair)" />
+
+    {/* White Clay / Foam Facial Mask across cheeks & jaw */}
+    <path
+      d="M37.5 46 C37.5 56 42 61 50 61 C58 61 62.5 56 62.5 46 C60 48.5 56 50 50 50 C44 50 40 48.5 37.5 46 Z"
+      fill="#ffffff"
+      stroke="#e2e8f0"
+      strokeWidth="0.8"
+    />
+
+    {/* Fresh Green Cucumber Eye Slices */}
+    <g transform="translate(43, 42)">
+      <circle cx="0" cy="0" r="4.5" fill="url(#sfmCuke)" stroke="#15803d" strokeWidth="0.8" />
+      <circle cx="0" cy="0" r="2.8" stroke="#bbf7d0" strokeWidth="0.5" strokeDasharray="1 1.2" fill="none" />
+      <circle cx="0" cy="0" r="1" fill="#15803d" />
+    </g>
+    <g transform="translate(57, 42)">
+      <circle cx="0" cy="0" r="4.5" fill="url(#sfmCuke)" stroke="#15803d" strokeWidth="0.8" />
+      <circle cx="0" cy="0" r="2.8" stroke="#bbf7d0" strokeWidth="0.5" strokeDasharray="1 1.2" fill="none" />
+      <circle cx="0" cy="0" r="1" fill="#15803d" />
+    </g>
+
+    {/* Relaxed serene smile */}
+    <path d="M47 55 Q50 57.5 53 55" stroke="#9a3412" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+  </svg>
+);
+
+// 6. Massage for Men (3D wooden massage bed with black leather cushion, white folded towel, face cradle)
+export const MassageForMenVisual: React.FC<{ className?: string }> = ({
+  className = 'w-16 h-16',
+}) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <defs>
+      {/* Drop shadow */}
+      <radialGradient id="menBedShadow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#0f172a" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#0f172a" stopOpacity="0" />
+      </radialGradient>
+      {/* Rich dark wood legs */}
+      <linearGradient id="menWoodLegs" x1="0" y1="45" x2="0" y2="85" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#a16207" />
+        <stop offset="40%" stopColor="#78350f" />
+        <stop offset="80%" stopColor="#451a03" />
+        <stop offset="100%" stopColor="#291102" />
+      </linearGradient>
+      {/* Black leather mattress cushion */}
+      <linearGradient id="blackBedCushion" x1="20" y1="36" x2="20" y2="52" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#334155" />
+        <stop offset="35%" stopColor="#1e293b" />
+        <stop offset="80%" stopColor="#0f172a" />
+        <stop offset="100%" stopColor="#020617" />
+      </linearGradient>
+      <linearGradient id="blackBedTop" x1="18" y1="36" x2="78" y2="36" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#475569" />
+        <stop offset="50%" stopColor="#334155" />
+        <stop offset="100%" stopColor="#1e293b" />
+      </linearGradient>
+      {/* White folded towel */}
+      <linearGradient id="whiteTowelFold" x1="38" y1="28" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#ffffff" />
+        <stop offset="60%" stopColor="#f8fafc" />
+        <stop offset="100%" stopColor="#e2e8f0" />
+      </linearGradient>
+    </defs>
+
+    {/* Ground contact shadow beneath massage table */}
+    <ellipse cx="50" cy="85" rx="38" ry="4.5" fill="url(#menBedShadow)" />
+
+    {/* Sturdy Wood Support Legs & Cross Bracing */}
+    {/* Left leg pair */}
+    <path d="M23 48 L16 84 H20 L27 48 Z" fill="url(#menWoodLegs)" />
+    <path d="M29 48 L36 84 H32 L25 48 Z" fill="url(#menWoodLegs)" />
+    {/* Right leg pair */}
+    <path d="M67 48 L60 84 H64 L71 48 Z" fill="url(#menWoodLegs)" />
+    <path d="M73 48 L80 84 H76 L69 48 Z" fill="url(#menWoodLegs)" />
+
+    {/* Horizontal wooden stretcher support beam */}
+    <rect x="21" y="66" width="55" height="3" rx="1" fill="#451a03" />
+    <rect x="22" y="66.5" width="53" height="1" fill="#a16207" opacity="0.8" />
+
+    {/* Diagonal cross tension wires */}
+    <line x1="27" y1="50" x2="67" y2="76" stroke="#94a3b8" strokeWidth="0.8" opacity="0.5" />
+    <line x1="67" y1="50" x2="27" y2="76" stroke="#94a3b8" strokeWidth="0.8" opacity="0.5" />
+
+    {/* Premium Black Leather Mattress Body */}
+    <rect
+      x="17"
+      y="38"
+      width="61"
+      height="12"
+      rx="3.5"
+      fill="url(#blackBedCushion)"
+      stroke="#0f172a"
+      strokeWidth="0.8"
+    />
+
+    {/* Beveled top cushion contour with leather sheen */}
+    <path
+      d="M20 38 H75 C76.5 38 78 39 78 40.5 V44 C78 45.5 76.5 46.5 75 46.5 H20 C18.5 46.5 17 45.5 17 44 V40.5 C17 39 18.5 38 20 38 Z"
+      fill="url(#blackBedTop)"
+    />
+    <line x1="19" y1="39" x2="76" y2="39" stroke="#64748b" strokeWidth="0.6" opacity="0.6" />
+
+    {/* Leather seam stitch indentation across center */}
+    <line x1="47.5" y1="38.5" x2="47.5" y2="47" stroke="#020617" strokeWidth="0.8" strokeDasharray="1 1.5" />
+
+    {/* Adjustable Face Cradle / Headrest on right side */}
+    <rect x="78" y="41" width="3.5" height="2" fill="#451a03" rx="0.5" />
+    <ellipse cx="84.5" cy="42" rx="4.5" ry="3.5" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+    <ellipse cx="84.5" cy="42" rx="2" ry="1.5" fill="#020617" />
+    <line x1="82" y1="41" x2="87" y2="41" stroke="#475569" strokeWidth="0.6" />
+
+    {/* Crisp White Folded Bath Towel in Center of Bed */}
+    <rect
+      x="36"
+      y="32"
+      width="14"
+      height="6.5"
+      rx="2"
+      fill="url(#whiteTowelFold)"
+      stroke="#cbd5e1"
+      strokeWidth="0.7"
+    />
+    {/* Towel fold crease lines */}
+    <ellipse cx="50" cy="35.2" rx="1.5" ry="3.2" fill="#e2e8f0" />
+    <ellipse cx="36" cy="35.2" rx="1.5" ry="3.2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.5" />
+    <path d="M37 34 H49" stroke="#cbd5e1" strokeWidth="0.6" />
+    <path d="M38 36.5 H48" stroke="#e2e8f0" strokeWidth="0.5" />
+  </svg>
+);
+

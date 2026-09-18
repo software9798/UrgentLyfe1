@@ -16,6 +16,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { ServiceItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface CompareServicesModalProps {
   isOpen: boolean;
@@ -152,6 +153,7 @@ export const CompareServicesModal: React.FC<CompareServicesModalProps> = ({
                       alt={service.title}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
+                      onError={(e) => handleImageError(e, service.categoryId || 'service')}
                     />
                     {service.discountPercent && (
                       <div className="absolute top-2 left-2 bg-red-600 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded-md">

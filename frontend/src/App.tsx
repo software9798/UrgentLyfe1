@@ -35,6 +35,7 @@ import {
   CartDrawer,
   CategoryPageView,
   SalonDermaModal,
+  MensSalonMassageModal,
   HelpCenterView,
   MyBookingsView,
   ApplianceRepairModal,
@@ -113,6 +114,8 @@ export default function App() {
   } | null>(null);
   const [isAPIDocsOpen, setIsAPIDocsOpen] = useState<boolean>(false);
   const [isSalonDermaModalOpen, setIsSalonDermaModalOpen] = useState<boolean>(false);
+  const [isMensSalonMassageModalOpen, setIsMensSalonMassageModalOpen] = useState<boolean>(false);
+  const [mensSalonModalInitialStep, setMensSalonModalInitialStep] = useState<'categories' | 'preference'>('categories');
 
   const handleOpenSalon = (subService?: string) => {
     const salonCat = categories.find((c) => c.id === 'salon');
@@ -124,6 +127,45 @@ export default function App() {
     } else {
       setIsSalonDermaModalOpen(true);
     }
+  };
+
+  const handleOpenMensSalon = (step: 'categories' | 'preference' = 'categories') => {
+    setMensSalonModalInitialStep(step);
+    setIsMensSalonMassageModalOpen(true);
+  };
+
+  const handleMensSalonOptionSelect = (
+    option: 'salon-men' | 'massage-men',
+    tier: 'royale' | 'prime' = 'royale'
+  ) => {
+    setIsMensSalonMassageModalOpen(false);
+    const menCat = categories.find((c) => c.id === 'salon-men') || {
+      id: 'salon-men',
+      name: "Men's Salon & Massage",
+      slug: 'salon-men',
+      icon: 'Scissors',
+      description: 'Grooming, haircuts, beard styling & massage therapies for men',
+      popular: true,
+      serviceCount: 16,
+    };
+
+    if (option === 'massage-men') {
+      const massageCat = categories.find((c) => c.id === 'massage-men') || {
+        id: 'massage-men',
+        name: 'Massage for Men',
+        slug: 'massage-for-men',
+        icon: 'Sparkles',
+        description: 'Pain relief, stress relief, post-workout recovery & add-on therapies for men',
+        popular: true,
+        serviceCount: 10,
+      };
+      setActiveCategoryInitialSubService('massage-men');
+      setActiveCategoryPageView(massageCat);
+    } else {
+      setActiveCategoryInitialSubService(tier);
+      setActiveCategoryPageView(menCat);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Role & View State
@@ -708,6 +750,17 @@ export default function App() {
               setActiveCategoryInitialSubService(subKey);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            onOpenPreferenceModal={() => {
+              if (
+                activeCategoryPageView.id === 'salon-men' ||
+                activeCategoryPageView.id === 'men-salon' ||
+                activeCategoryPageView.id === 'massage-men'
+              ) {
+                handleOpenMensSalon('preference');
+              } else {
+                handleOpenSalon();
+              }
+            }}
             selectedCityName={selectedCity.name}
             selectedLocality={selectedLocality}
           />
@@ -731,8 +784,8 @@ export default function App() {
                 handleOpenSalon();
                 return;
               }
-              if (catId === 'men-salon') {
-                handleOpenSalon('Men Grooming & Haircut');
+              if (catId === 'men-salon' || catId === 'salon-men') {
+                handleOpenMensSalon('categories');
                 return;
               }
               const mappedId = catId === 'wall-panels' ? 'carpentry-painting' : catId;
@@ -767,6 +820,10 @@ export default function App() {
                   }
                 }
                 setIsApplianceModalOpen(true);
+                return;
+              }
+              if (categoryId === 'men-salon' || categoryId === 'salon-men') {
+                setIsMensSalonMassageModalOpen(true);
                 return;
               }
               const cat = categories.find((c) => c.id === categoryId);
@@ -890,12 +947,21 @@ export default function App() {
                   handleOpenSalon();
                   return;
                 }
+                if (catId === 'salon-men' || catId === 'men-salon') {
+                  handleOpenMensSalon('categories');
+                  return;
+                }
+                if (catId === 'massage-men' || catId === 'massage-for-men') {
+                  handleMensSalonOptionSelect('massage-men');
+                  return;
+                }
                 const cat = categories.find((c) => c.id === catId);
                 if (cat) {
                   setActiveCategoryPageView(cat);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }}
+              onOpenSalonMenPreference={() => handleOpenMensSalon('preference')}
               onOpenServiceDetail={(service) => setSelectedServiceDetail(service)}
               onAddToCart={handleAddToCart}
             />
@@ -1212,6 +1278,16 @@ export default function App() {
             setActiveCategoryPageView(salonCat);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
+        }}
+      />
+
+      {/* Men's Salon & Massage Modal (Matching Screenshot) */}
+      <MensSalonMassageModal
+        isOpen={isMensSalonMassageModalOpen}
+        initialStep={mensSalonModalInitialStep}
+        onClose={() => setIsMensSalonMassageModalOpen(false)}
+        onSelectOption={(option, tier) => {
+          handleMensSalonOptionSelect(option, tier);
         }}
       />
 

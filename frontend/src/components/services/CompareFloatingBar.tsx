@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRightLeft, X, Sparkles, Zap, ChevronRight, Trash2 } from 'lucide-react';
 import { ServiceItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface CompareFloatingBarProps {
   compareList: ServiceItem[];
@@ -52,6 +53,7 @@ export const CompareFloatingBar: React.FC<CompareFloatingBarProps> = ({
                 alt={service.title}
                 className="w-6 h-6 rounded-lg object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => handleImageError(e, service.categoryId || 'service')}
               />
               <div className="max-w-[110px] sm:max-w-[130px] truncate">
                 <p className="font-semibold text-slate-200 truncate">{service.title}</p>

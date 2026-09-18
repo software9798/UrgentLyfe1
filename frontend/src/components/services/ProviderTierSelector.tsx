@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, ShieldCheck, Zap, Award, Clock, CheckCircle2, UserCheck, ArrowUpDown, MapPin, Sparkles } from 'lucide-react';
 import { ProviderTier, ServiceItem, Partner } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 export interface ProviderTierInfo {
   id: ProviderTier;
@@ -177,6 +178,8 @@ export const ProviderTierSelector: React.FC<ProviderTierSelectorProps> = ({
                       src={partner.avatar}
                       alt={partner.name}
                       className="w-12 h-12 rounded-2xl object-cover border-2 border-amber-400 shadow-xs shrink-0"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => handleImageError(e, 'avatar')}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
@@ -334,6 +337,8 @@ export const ProviderTierSelector: React.FC<ProviderTierSelectorProps> = ({
                         src={topPartner.avatar}
                         alt={topPartner.name}
                         className="w-7 h-7 rounded-full object-cover border border-amber-400 shrink-0"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => handleImageError(e, 'avatar')}
                       />
                       <div className="flex-1 min-w-0">
                         <p className={`font-bold truncate text-[11px] ${isSelected ? 'text-white' : 'text-slate-900'}`}>

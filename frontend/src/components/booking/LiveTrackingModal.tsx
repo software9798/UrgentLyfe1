@@ -18,6 +18,7 @@ import {
 import { Booking } from '../../types';
 import { downloadInvoiceFile } from '../../utils/invoiceGenerator';
 import { getGoogleMapsDirectionsUrl } from '../../utils/directionsHelper';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface LiveTrackingModalProps {
   booking: Booking | null;
@@ -176,6 +177,8 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
                   src={partner.avatar}
                   alt={partner.name}
                   className="w-14 h-14 rounded-full object-cover border-2 border-indigo-600 shadow-xs"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => handleImageError(e, 'avatar')}
                 />
                 <div>
                   <div className="flex items-center gap-1.5">

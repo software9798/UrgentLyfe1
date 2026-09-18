@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { handleImageError } from '../../utils/imageFallback';
 import {
   Clock,
   ArrowRight,
@@ -294,6 +295,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     alt="Beauty & Wellness at home"
                     className="w-full h-[320px] sm:h-[420px] object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => handleImageError(e, 'facial')}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
                   
@@ -317,6 +320,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                       alt="Relaxation and home massage"
                       className="w-full h-[152px] sm:h-[200px] object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => handleImageError(e, 'spa')}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
                     <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">
@@ -334,6 +339,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                       alt="AC technician servicing unit"
                       className="w-full h-[152px] sm:h-[200px] object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => handleImageError(e, 'ac')}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
                     <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white">

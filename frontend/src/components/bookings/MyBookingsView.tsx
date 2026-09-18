@@ -21,6 +21,7 @@ import {
 import { Booking } from '../../types';
 import { downloadInvoiceFile } from '../../utils/invoiceGenerator';
 import { api } from '../../api/client';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface MyBookingsViewProps {
   bookings: Booking[];
@@ -270,6 +271,8 @@ export const MyBookingsView: React.FC<MyBookingsViewProps> = ({
                             }
                             alt={booking.service.title}
                             className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => handleImageError(e, 'service')}
                           />
                         </div>
                         <div>

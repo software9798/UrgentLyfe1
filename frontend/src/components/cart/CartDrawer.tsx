@@ -13,6 +13,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { CartItem, ServiceItem } from '../../types';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -151,6 +152,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         alt={service.title}
                         className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-100 bg-slate-100"
                         referrerPolicy="no-referrer"
+                        onError={(e) => handleImageError(e, service.categoryId || 'service')}
                       />
 
                       <div className="flex-1 min-w-0">

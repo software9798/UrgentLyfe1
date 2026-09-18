@@ -1358,7 +1358,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
       },
       {
         title: 'High monthly electricity bills',
-        image: 'https://images.unsplash.com/photo-1558441719-79753c15ec97?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80',
       },
     ],
     whenToAvoid: [
@@ -1375,7 +1375,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
       {
         title: 'High-pressure foam jet & cooling coil descaling',
         description: 'Flushes out dust blocks, pet hair, and fungal growth trapped inside cooling fins.',
-        image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&auto=format&fit=crop&q=80',
       },
     ],
     focusZones: [
@@ -1405,18 +1405,18 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
         step: 3,
         title: 'Foam-jet deep wash of coils & blower',
         description: 'Special non-corrosive chemical foam dissolves grease and accumulated grime.',
-        image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&auto=format&fit=crop&q=80',
       },
       {
         step: 4,
         title: 'Post-service temp check & 30-day warranty card',
         description: 'Verified drop in supply temperature (avg 18°C-21°C) with warranty activated.',
-        image: 'https://images.unsplash.com/photo-1558441719-79753c15ec97?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80',
       },
     ],
     setupTitle: 'AC Tech Equipment Kit',
     setupDimensions: 'Pressure Washer (80 bar) + Spill Jacket',
-    setupImage: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=500&auto=format&fit=crop&q=80',
+    setupImage: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&auto=format&fit=crop&q=80',
     expertBadgeTitle: 'Certified AC Masters, UrgentLyfe Guarantee',
     expertPoints: [
       'Police verified & background cleared',
@@ -1811,7 +1811,7 @@ export function getServiceRichDetail(service: {
         },
         {
           title: 'Low performance & high power bills',
-          image: 'https://images.unsplash.com/photo-1558441719-79753c15ec97?w=400&auto=format&fit=crop&q=80',
+          image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80',
         },
       ],
       whenToAvoid: [
@@ -1822,7 +1822,7 @@ export function getServiceRichDetail(service: {
         {
           title: 'Digital multimeter & gas pressure diagnostics',
           description: 'Pinpoints the exact faulty capacitor, thermostat or relay without guesswork.',
-          image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80',
+          image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80',
         },
         {
           title: 'Precision component replacement & sealing',
@@ -1845,7 +1845,7 @@ export function getServiceRichDetail(service: {
           step: 2,
           title: 'Fault isolation & transparent quoting',
           description: 'Explaining the issue with digital rate card verification.',
-          image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80',
+          image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80',
         },
         {
           step: 3,
@@ -1857,12 +1857,12 @@ export function getServiceRichDetail(service: {
           step: 4,
           title: 'Full load test & warranty activation',
           description: '15-minute uninterrupted trial in customer presence to verify zero noise or leaks.',
-          image: 'https://images.unsplash.com/photo-1558441719-79753c15ec97?w=400&auto=format&fit=crop&q=80',
+          image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&auto=format&fit=crop&q=80',
         },
       ],
       setupTitle: 'Appliance Repair Toolkit',
       setupDimensions: 'Heavy Duty Tech Kit + Protective Floor Mat',
-      setupImage: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=500&auto=format&fit=crop&q=80',
+      setupImage: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&auto=format&fit=crop&q=80',
       expertBadgeTitle: 'Expertise you can trust, care you can feel',
       expertPoints: [
         'Police verified and background checked',
@@ -2160,7 +2160,7 @@ export function getServiceRichDetail(service: {
         },
         {
           title: 'Pre-summer tune-up to cut electricity bills',
-          image: 'https://images.unsplash.com/photo-1558441719-79753c15ec97?w=400&auto=format&fit=crop&q=80',
+          image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80',
         },
       ],
       whenToAvoid: [
@@ -2786,11 +2786,11 @@ export function getServiceRichDetail(service: {
       },
       {
         title: 'New fixture mounting or upgrade',
-        image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=400&auto=format&fit=crop&q=80',
       },
       {
         title: 'Safe standardized billing',
-        image: 'https://images.unsplash.com/photo-1558441719-79753c15ec97?w=400&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&auto=format&fit=crop&q=80',
       },
     ],
     whenToAvoid: [

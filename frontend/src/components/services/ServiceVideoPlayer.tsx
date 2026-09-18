@@ -148,7 +148,7 @@ export const ServiceVideoPlayer: React.FC<ServiceVideoPlayerProps> = ({
             toolName: toolsUsed[2] || 'Pure Refrigerant Cylinder & Manifold',
             metricLabel: 'Gas Pressure',
             metricValue: '140 PSI (100% Pure R32)',
-            image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=1200&q=85',
+            image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1200&q=85',
             animationType: 'ac',
           },
           {

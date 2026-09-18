@@ -3,6 +3,7 @@ import { ALL_SALON_SERVICES } from './salonData';
 import { SPA_SERVICES } from './spaData';
 import { HAIR_STUDIO_SERVICES } from './hairStudioData';
 import { MAKEUP_SERVICES } from './makeupData';
+import { MASSAGE_MEN_SERVICES } from './massageMenData';
 
 export const CITIES: City[] = [
   {
@@ -316,12 +317,21 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'salon-men',
-    name: 'Salon for Men',
+    name: "Men's Salon & Massage",
     slug: 'salon-men',
     icon: 'Scissors',
     description: 'Royale & Prime grooming, expert haircuts, beard styling, massage & pedicures (Starts ₹249)',
     popular: true,
-    serviceCount: 16,
+    serviceCount: 20,
+  },
+  {
+    id: 'massage-men',
+    name: 'Massage for Men',
+    slug: 'massage-for-men',
+    icon: 'Sparkles',
+    description: 'Deep tissue sports recovery, stress relief, leg & back massage therapies (Starts ₹499)',
+    popular: true,
+    serviceCount: 8,
   },
   {
     id: 'carpentry-painting',
@@ -337,6 +347,7 @@ export const CATEGORIES: Category[] = [
 export const SERVICES: ServiceItem[] = [
   ...ALL_SALON_SERVICES,
   ...MAKEUP_SERVICES,
+  ...MASSAGE_MEN_SERVICES,
   {
     id: 'ac-foam-jet-service',
     categoryId: 'ac-appliance',
@@ -466,7 +477,7 @@ export const SERVICES: ServiceItem[] = [
     description: 'Complete RO system inspection, booster pump check, pre-filter replacement check, and digital TDS water quality test.',
     includes: ['Sediment & Carbon filter cleaning', 'Digital TDS test & water quality check', 'Booster pump pressure check', 'Leakage sealant fix'],
     excludes: ['New RO Membrane / Filter replacements'],
-    image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=800&q=80',
     isUrgentAvailable: true,
     urgentFee: 99,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
@@ -3781,7 +3792,7 @@ export const SERVICES: ServiceItem[] = [
       'Water tank disinfectant wash to eliminate stagnant smell',
     ],
     excludes: ['Cost of brand new honeycomb pad sets if required'],
-    image: 'https://images.unsplash.com/photo-1558441719-79753c15ec97?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
     isUrgentAvailable: true,
     urgentFee: 39,
     tags: ['Cooler Repair', 'Submersible Pump', 'Summer Ready'],

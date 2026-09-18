@@ -14,6 +14,7 @@ export const FALLBACK_IMAGES = {
   cleaning: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80',
   painting: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
   service: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
   default: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80',
 };
 
@@ -22,10 +23,11 @@ export const FALLBACK_IMAGES = {
  */
 export const handleImageError = (
   e: React.SyntheticEvent<HTMLImageElement, Event>,
-  fallbackCategory: keyof typeof FALLBACK_IMAGES = 'default'
+  fallbackCategory: string = 'default'
 ) => {
   const target = e.currentTarget;
-  const fallbackUrl = FALLBACK_IMAGES[fallbackCategory] || FALLBACK_IMAGES.default;
+  const key = fallbackCategory as keyof typeof FALLBACK_IMAGES;
+  const fallbackUrl = FALLBACK_IMAGES[key] || FALLBACK_IMAGES.default;
   if (target.src !== fallbackUrl) {
     target.src = fallbackUrl;
   }

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ServiceItem, Category } from '../../types';
 import { searchServices } from '../../utils/searchHelper';
+import { handleImageError } from '../../utils/imageFallback';
 
 interface ServiceDiscoverySectionProps {
   searchQuery: string;
@@ -255,6 +256,7 @@ export const ServiceDiscoverySection: React.FC<ServiceDiscoverySectionProps> = (
                             alt={srv.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             referrerPolicy="no-referrer"
+                            onError={(e) => handleImageError(e, srv.categoryId || 'service')}
                           />
                           {hasFreeCheck && (
                             <span className="absolute top-1 left-1 bg-emerald-800 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-xs leading-tight">
@@ -431,6 +433,7 @@ export const ServiceDiscoverySection: React.FC<ServiceDiscoverySectionProps> = (
                             alt={srv.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             referrerPolicy="no-referrer"
+                            onError={(e) => handleImageError(e, srv.categoryId || 'service')}
                           />
                           {srv.discountPercent && (
                             <span className="absolute top-2 left-2 bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-xs">

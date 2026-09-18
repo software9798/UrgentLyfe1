@@ -893,7 +893,7 @@ export const APPLIANCES_LIST: ApplianceConfig[] = [
         ],
         popular: true,
         symptomTags: ['Water tastes bad or smells funny', 'Water flow from tap is very slow / trickling'],
-        image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=600&q=80',
       },
       {
         id: 'ro-membrane-all-filters-kit',
@@ -914,7 +914,7 @@ export const APPLIANCES_LIST: ApplianceConfig[] = [
         ],
         popular: true,
         symptomTags: ['Continuous beeping / filter replacement alert', 'Water tastes bad or smells funny'],
-        image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&w=600&q=80',
       },
       {
         id: 'ro-booster-pump-leak-repair',
@@ -934,7 +934,7 @@ export const APPLIANCES_LIST: ApplianceConfig[] = [
         ],
         popular: false,
         symptomTags: ['Booster pump vibrating or making buzzing sound', 'Water leaking from purifier body or pipes'],
-        image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?auto=format&fit=crop&w=600&q=80',
+        image: 'https://images.unsplash.com/photo-1585659722983-3a675dabf23d?auto=format&fit=crop&w=600&q=80',
       },
     ],
   },
