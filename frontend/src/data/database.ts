@@ -19,6 +19,9 @@ import {
   UserRole,
   ReferralRecord,
   ReferralStats,
+  LoyaltyTransaction,
+  LoyaltySummary,
+  LoyaltyTierInfo,
 } from '../types';
 import { CITIES, CATEGORIES, SERVICES, PARTNERS, MOCK_BOOKINGS } from './mockData';
 
@@ -45,6 +48,7 @@ export class UrgentLyfeDatabase {
   public aiRecommendations: Map<string, AIRecommendation> = new Map();
   public activeOtps: Map<string, { otp: string; expiresAt: number }> = new Map();
   public referrals: Map<string, ReferralRecord> = new Map();
+  public loyaltyTransactions: Map<string, LoyaltyTransaction> = new Map();
 
   constructor() {
     this.seedDatabase();
@@ -352,6 +356,62 @@ export class UrgentLyfeDatabase {
     this.referrals.set(ref2.id, ref2);
     this.referrals.set(ref3.id, ref3);
     this.referrals.set(ref4.id, ref4);
+
+    // 14. Seed Loyalty Transactions for Default Customer (Aarav Mehta - 340 pts total)
+    const lt1: LoyaltyTransaction = {
+      id: 'lt-101',
+      userId: customerUser.id,
+      type: 'EARNED',
+      points: 120,
+      bookingId: 'UL-7430',
+      serviceTitle: 'Power Foam Jet AC Service',
+      description: 'Earned 120 loyalty points for completed AC Foam Jet Service',
+      createdAt: new Date(Date.now() - 14 * 86400000).toISOString(),
+    };
+    const lt2: LoyaltyTransaction = {
+      id: 'lt-102',
+      userId: customerUser.id,
+      type: 'EARNED',
+      points: 85,
+      bookingId: 'UL-8104',
+      serviceTitle: 'Emergency Short Circuit Repair',
+      description: 'Earned 85 loyalty points for completed Emergency Electrical Service',
+      createdAt: new Date(Date.now() - 9 * 86400000).toISOString(),
+    };
+    const lt3: LoyaltyTransaction = {
+      id: 'lt-103',
+      userId: customerUser.id,
+      type: 'EARNED',
+      points: 135,
+      bookingId: 'UL-8921',
+      serviceTitle: 'Full Home Deep Sanitization',
+      description: 'Earned 135 loyalty points for completed Home Deep Cleaning',
+      createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+    };
+    const lt4: LoyaltyTransaction = {
+      id: 'lt-104',
+      userId: customerUser.id,
+      type: 'BONUS',
+      points: 50,
+      description: 'Referral reward bonus: Friend completed their first booking',
+      createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+    };
+    const lt5: LoyaltyTransaction = {
+      id: 'lt-105',
+      userId: customerUser.id,
+      type: 'REDEEMED',
+      points: 50,
+      bookingId: 'UL-9022',
+      serviceTitle: 'Kitchen Water Leakage Drain Repair',
+      description: 'Redeemed 50 loyalty points for ₹50 instant checkout discount',
+      createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+    };
+
+    this.loyaltyTransactions.set(lt1.id, lt1);
+    this.loyaltyTransactions.set(lt2.id, lt2);
+    this.loyaltyTransactions.set(lt3.id, lt3);
+    this.loyaltyTransactions.set(lt4.id, lt4);
+    this.loyaltyTransactions.set(lt5.id, lt5);
   }
 
   // --- AUTH METHODS ---
@@ -1011,6 +1071,233 @@ export class UrgentLyfeDatabase {
 
     return this.getReferralStats(userId);
   }
+
+  // --- LOYALTY POINTS & REWARDS ENGINE ---
+
+  public getLoyaltyTier(points: number): LoyaltyTierInfo {
+    if (points >= 601) {
+      return {
+        tier: 'PLATINUM',
+        name: 'Platinum VIP',
+        minPoints: 601,
+        discountMultiplier: 1.5,
+        earningRate: '1.5x Points (15 pts per ₹100)',
+        badgeColor: 'bg-gradient-to-r from-purple-500 via-indigo-500 to-amber-400 text-white',
+        perks: [
+          'Zero Emergency SOS Surcharge',
+          '1.5x Points Multiplier on Every Booking',
+          'Dedicated VIP Concierge Desk',
+          'Free Annual AC Filter Audit',
+        ],
+      };
+    } else if (points >= 201) {
+      return {
+        tier: 'GOLD',
+        name: 'Gold Member',
+        minPoints: 201,
+        discountMultiplier: 1.2,
+        earningRate: '1.2x Points (12 pts per ₹100)',
+        badgeColor: 'bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-black',
+        perks: [
+          'Top-Rated Technician Priority Match',
+          '1.2x Points Multiplier on Completed Jobs',
+          'Zero Cancellation Penalties',
+          '₹50 Birthday Special Booking Credit',
+        ],
+      };
+    } else {
+      return {
+        tier: 'SILVER',
+        name: 'Silver Member',
+        minPoints: 0,
+        discountMultiplier: 1.0,
+        earningRate: '1.0x Points (10 pts per ₹100)',
+        badgeColor: 'bg-slate-200 text-slate-800 font-bold',
+        perks: [
+          'Earn 1 Point per ₹10 on All Completed Services',
+          'Instant Discount Redemption at Checkout',
+          '100% Free Rescheduling',
+        ],
+      };
+    }
+  }
+
+  public getLoyaltySummary(userId: string): LoyaltySummary {
+    const user = this.users.get(userId) || Array.from(this.users.values())[0];
+    const points = user.loyaltyPoints || 0;
+    const tier = this.getLoyaltyTier(points);
+
+    let nextTierPoints = 0;
+    let nextTierName = 'Maximum Tier Achieved!';
+    let progressPercent = 100;
+
+    if (tier.tier === 'SILVER') {
+      nextTierPoints = Math.max(0, 201 - points);
+      nextTierName = 'Gold Member';
+      progressPercent = Math.min(100, Math.round((points / 201) * 100));
+    } else if (tier.tier === 'GOLD') {
+      nextTierPoints = Math.max(0, 601 - points);
+      nextTierName = 'Platinum VIP';
+      progressPercent = Math.min(100, Math.round(((points - 201) / (601 - 201)) * 100));
+    }
+
+    const userTransactions = Array.from(this.loyaltyTransactions.values())
+      .filter((t) => t.userId === user.id)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const totalPointsEarnedLifetime = userTransactions
+      .filter((t) => t.type === 'EARNED' || t.type === 'BONUS')
+      .reduce((sum, t) => sum + t.points, 0);
+
+    const totalPointsRedeemedLifetime = userTransactions
+      .filter((t) => t.type === 'REDEEMED')
+      .reduce((sum, t) => sum + t.points, 0);
+
+    const totalSavingsRupees = totalPointsRedeemedLifetime * 1; // 1 point = ₹1
+
+    return {
+      points,
+      rupeeValue: points * 1, // 1 loyalty point = ₹1
+      tier,
+      nextTierPoints,
+      nextTierName,
+      progressPercent,
+      totalPointsEarnedLifetime,
+      totalPointsRedeemedLifetime,
+      totalSavingsRupees,
+      conversionRate: { points: 1, rupees: 1 },
+      transactions: userTransactions,
+    };
+  }
+
+  public earnLoyaltyPoints(
+    userId: string,
+    points: number,
+    bookingId?: string,
+    description?: string,
+    serviceTitle?: string
+  ): { success: boolean; earnedPoints: number; newBalance: number; transaction: LoyaltyTransaction } {
+    const user = this.users.get(userId);
+    if (!user) throw new Error('User not found.');
+
+    const finalPoints = Math.max(1, Math.round(points));
+    user.loyaltyPoints = (user.loyaltyPoints || 0) + finalPoints;
+    user.updatedAt = new Date().toISOString();
+    this.users.set(user.id, user);
+
+    const tx: LoyaltyTransaction = {
+      id: `lt-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId: user.id,
+      type: 'EARNED',
+      points: finalPoints,
+      bookingId,
+      serviceTitle,
+      description: description || `Earned ${finalPoints} points on completed service`,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.loyaltyTransactions.set(tx.id, tx);
+
+    this.addNotification(
+      user.id,
+      `+${finalPoints} Loyalty Points Credited! 🌟`,
+      `You earned ${finalPoints} loyalty points for completed booking ${bookingId ? '#' + bookingId : ''}. Total Balance: ${user.loyaltyPoints} pts (₹${user.loyaltyPoints} value)!`,
+      'OFFER',
+      { bookingId }
+    );
+
+    return {
+      success: true,
+      earnedPoints: finalPoints,
+      newBalance: user.loyaltyPoints,
+      transaction: tx,
+    };
+  }
+
+  public redeemLoyaltyPoints(
+    userId: string,
+    pointsToRedeem: number,
+    bookingId?: string,
+    description?: string
+  ): { success: boolean; redeemedPoints: number; discountAmount: number; remainingPoints: number; transaction: LoyaltyTransaction } {
+    const user = this.users.get(userId);
+    if (!user) throw new Error('User not found.');
+
+    const currentPoints = user.loyaltyPoints || 0;
+    const points = Math.min(Math.max(1, Math.round(pointsToRedeem)), currentPoints);
+
+    if (points <= 0 || currentPoints < points) {
+      throw new Error(`Insufficient loyalty points. Current balance is ${currentPoints} points.`);
+    }
+
+    user.loyaltyPoints = currentPoints - points;
+    user.updatedAt = new Date().toISOString();
+    this.users.set(user.id, user);
+
+    const discountAmount = points * 1; // 1 point = ₹1 discount
+
+    const tx: LoyaltyTransaction = {
+      id: `lt-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      userId: user.id,
+      type: 'REDEEMED',
+      points,
+      bookingId,
+      description: description || `Redeemed ${points} loyalty points for ₹${discountAmount} discount`,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.loyaltyTransactions.set(tx.id, tx);
+
+    this.addNotification(
+      user.id,
+      `Redeemed ${points} Loyalty Points (₹${discountAmount} OFF) 🎉`,
+      `Applied ${points} points discount towards booking ${bookingId ? '#' + bookingId : 'checkout'}. Remaining balance: ${user.loyaltyPoints} pts.`,
+      'OFFER',
+      { bookingId }
+    );
+
+    return {
+      success: true,
+      redeemedPoints: points,
+      discountAmount,
+      remainingPoints: user.loyaltyPoints,
+      transaction: tx,
+    };
+  }
+
+  public awardCompletedBookingPoints(bookingId: string): { success: boolean; pointsEarned: number; newBalance: number } {
+    const booking = this.bookings.get(bookingId);
+    if (!booking) throw new Error('Booking not found');
+
+    if (booking.loyaltyPointsAwarded) {
+      const user = this.users.get(booking.userId);
+      return { success: true, pointsEarned: booking.loyaltyPointsEarned || 0, newBalance: user?.loyaltyPoints || 0 };
+    }
+
+    // Calculation: 1 point per ₹10 of totalAmount + 15 bonus if emergency SOS
+    const basePoints = Math.max(25, Math.round(booking.totalAmount / 10));
+    const bonusSOS = booking.isUrgent ? 15 : 0;
+    const totalPoints = basePoints + bonusSOS;
+
+    booking.loyaltyPointsEarned = totalPoints;
+    booking.loyaltyPointsAwarded = true;
+    this.bookings.set(booking.id, booking);
+
+    const res = this.earnLoyaltyPoints(
+      booking.userId,
+      totalPoints,
+      booking.id,
+      `Completed service #${booking.id} (${booking.service.title})${booking.isUrgent ? ' + 15 SOS Bonus' : ''}`,
+      booking.service.title
+    );
+
+    return {
+      success: true,
+      pointsEarned: totalPoints,
+      newBalance: res.newBalance,
+    };
+  }
 }
 
 export const db = new UrgentLyfeDatabase();
+

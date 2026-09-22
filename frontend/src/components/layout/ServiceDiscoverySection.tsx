@@ -176,7 +176,7 @@ export const ServiceDiscoverySection: React.FC<ServiceDiscoverySectionProps> = (
           </p>
         </div>
 
-        {/* Large Urban Company Style Search Input Form */}
+        {/* Large UrgentLyfe Style Search Input Form */}
         <div ref={containerRef} className="max-w-2xl mx-auto mb-5 relative">
           <form
             onSubmit={handleSearchSubmit}
@@ -226,7 +226,7 @@ export const ServiceDiscoverySection: React.FC<ServiceDiscoverySectionProps> = (
             </div>
           </form>
 
-          {/* Urban Company Live Suggestion Dropdown */}
+          {/* UrgentLyfe Live Suggestion Dropdown */}
           {isFocused && searchQuery.trim().length > 0 && (
             <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200/95 overflow-hidden z-50 animate-fadeIn">
               {topDropdownSuggestions.length > 0 ? (

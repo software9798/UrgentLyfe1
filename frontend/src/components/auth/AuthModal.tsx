@@ -298,10 +298,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* URBAN COMPANY STYLE MOBILE LOGIN + CLOUDFLARE TURNSTILE MODAL */}
+      {/* URGENTLYFE STYLE MOBILE LOGIN + CLOUDFLARE TURNSTILE MODAL */}
       {mode === 'login' && loginMethod === 'phone_otp' ? (
         <div
-          id="urban-company-login-card"
+          id="urgentlyfe-login-card"
           className="relative w-full max-w-md bg-white rounded-3xl sm:rounded-[32px] shadow-2xl border border-slate-100 p-6 sm:p-8 transition-all animate-in fade-in zoom-in-95 duration-200"
         >
           {/* Top-Right Circular Close Button (Matches video at 00:07 - 00:10) */}

@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   Award,
   Star,
+  Crown,
+  Coins,
 } from 'lucide-react';
 import { ServiceItem, AIDiagnosis, Booking, City, ProviderTier, Partner } from '../../types';
 import { api } from '../../api/client';
@@ -30,6 +32,8 @@ interface BookingWizardModalProps {
   selectedCity: City;
   selectedLocality: string;
   onBookingSuccess: (booking: Booking) => void;
+  loyaltyPoints?: number;
+  onLoyaltyPointsRedeemed?: (pointsRedeemed: number) => void;
 }
 
 export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
@@ -41,6 +45,8 @@ export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
   selectedCity,
   selectedLocality,
   onBookingSuccess,
+  loyaltyPoints = 340,
+  onLoyaltyPointsRedeemed,
 }) => {
   if (!isOpen || !service) return null;
 
@@ -57,10 +63,11 @@ export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
   const [pincode, setPincode] = useState<string>('560038');
   const [landmark, setLandmark] = useState<string>('Near Metro Station Gate 2');
 
-  // Coupon & Payment
+  // Coupon, Loyalty & Payment
   const [couponCode, setCouponCode] = useState<string>('URGENT20');
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
   const [couponMsg, setCouponMsg] = useState<string>('20% OFF Applied');
+  const [loyaltyPointsToRedeem, setLoyaltyPointsToRedeem] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CARD' | 'CASH' | 'WALLET'>('CASH');
   const [notes, setNotes] = useState<string>('');
 
@@ -71,10 +78,18 @@ export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
   const tierInfo = PROVIDER_TIERS.find((t) => t.id === selectedProviderTier) || PROVIDER_TIERS[1];
   const subtotal = Math.round(service.price * tierInfo.priceMultiplier);
   const urgentFee = isUrgent ? service.urgentFee : 0;
-  const discountAmount = appliedDiscount || (couponCode ? Math.min(subtotal * 0.2, 200) : 0);
-  const taxable = Math.max(0, subtotal + urgentFee - discountAmount);
+  const couponDiscount = appliedDiscount || (couponCode ? Math.min(subtotal * 0.2, 200) : 0);
+
+  // Loyalty calculations: allow redeeming up to available balance, max 50% of bill after coupon
+  const availableLoyaltyBalance = loyaltyPoints;
+  const maxAllowedLoyaltyDiscount = Math.floor(Math.max(0, subtotal + urgentFee - couponDiscount) * 0.5);
+  const actualLoyaltyDiscount = Math.min(loyaltyPointsToRedeem, availableLoyaltyBalance, maxAllowedLoyaltyDiscount);
+
+  const totalDiscount = couponDiscount + actualLoyaltyDiscount;
+  const taxable = Math.max(0, subtotal + urgentFee - totalDiscount);
   const gstTax = Math.round(taxable * 0.18);
   const totalAmount = Math.round(taxable + gstTax);
+  const expectedPointsEarned = Math.max(25, Math.round(subtotal / 10)) + (isUrgent ? 15 : 0);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -115,9 +130,13 @@ export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
         notes,
         aiDiagnosis: aiDiagnosis || undefined,
         couponCode,
+        loyaltyPointsRedeemed: actualLoyaltyDiscount,
       };
 
       const createdBooking = await api.createBooking(bookingData);
+      if (actualLoyaltyDiscount > 0 && onLoyaltyPointsRedeemed) {
+        onLoyaltyPointsRedeemed(actualLoyaltyDiscount);
+      }
       setLoading(false);
       onBookingSuccess(createdBooking);
       onClose();
@@ -371,6 +390,71 @@ export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
                 {couponMsg && <p className="text-[10px] text-emerald-600 font-semibold mt-1">{couponMsg}</p>}
               </div>
 
+              {/* Loyalty Points Redemption Box */}
+              <div className="bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-indigo-50 border border-amber-300 rounded-xl p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Crown className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-wider">
+                      Redeem Loyalty Points
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                    {availableLoyaltyBalance} pts available
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-600">
+                  Apply your points for an instant discount on this booking (1 pt = ₹1 discount, max 50% of bill).
+                </p>
+
+                {availableLoyaltyBalance > 0 ? (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[
+                        { pts: 0, label: 'None' },
+                        { pts: 50, label: '50 Pts (₹50)' },
+                        { pts: 100, label: '100 Pts (₹100)' },
+                        {
+                          pts: Math.min(availableLoyaltyBalance, maxAllowedLoyaltyDiscount),
+                          label: `Max (${Math.min(availableLoyaltyBalance, maxAllowedLoyaltyDiscount)} Pts)`,
+                        },
+                      ].map((chip) => {
+                        const isDisabled = chip.pts > availableLoyaltyBalance || (chip.pts > maxAllowedLoyaltyDiscount && chip.pts > 0);
+                        return (
+                          <button
+                            key={chip.label}
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => setLoyaltyPointsToRedeem(chip.pts)}
+                            className={`py-1.5 px-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                              loyaltyPointsToRedeem === chip.pts
+                                ? 'bg-amber-400 text-slate-950 border-amber-500 font-black shadow-xs'
+                                : isDisabled
+                                ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-amber-300'
+                            }`}
+                          >
+                            {chip.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {actualLoyaltyDiscount > 0 && (
+                      <div className="text-[11px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 rounded-lg p-2 flex items-center justify-between">
+                        <span>🌟 Applied {actualLoyaltyDiscount} Loyalty Points</span>
+                        <span>-₹{actualLoyaltyDiscount} Instant Discount</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-slate-500 italic">
+                    Complete bookings to earn points for future discounts.
+                  </p>
+                )}
+              </div>
+
               {/* Payment Mode Selection */}
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -427,10 +511,16 @@ export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
                     <span>₹{urgentFee}</span>
                   </div>
                 )}
-                {discountAmount > 0 && (
+                {couponDiscount > 0 && (
                   <div className="flex justify-between text-xs text-emerald-400">
                     <span>Coupon Discount</span>
-                    <span>-₹{Math.round(discountAmount)}</span>
+                    <span>-₹{Math.round(couponDiscount)}</span>
+                  </div>
+                )}
+                {actualLoyaltyDiscount > 0 && (
+                  <div className="flex justify-between text-xs text-amber-300 font-bold">
+                    <span>🌟 Loyalty Points Discount ({actualLoyaltyDiscount} pts)</span>
+                    <span>-₹{actualLoyaltyDiscount}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-xs text-slate-400">
@@ -440,6 +530,13 @@ export const BookingWizardModal: React.FC<BookingWizardModalProps> = ({
                 <div className="pt-2 border-t border-slate-800 flex justify-between text-sm font-black text-white">
                   <span>Total Payable</span>
                   <span className="text-amber-400 text-base">₹{totalAmount}</span>
+                </div>
+                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-amber-300 font-semibold">
+                  <span className="flex items-center gap-1">
+                    <Coins className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Loyalty Points on Completion:</span>
+                  </span>
+                  <span className="font-black text-amber-400">+{expectedPointsEarned} PTS</span>
                 </div>
               </div>
             </div>

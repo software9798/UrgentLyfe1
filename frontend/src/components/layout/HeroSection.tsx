@@ -282,7 +282,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Modern Image Collage Section (Urban Company Style from IMAGE 2) */}
+          {/* RIGHT COLUMN: Modern Image Collage Section (UrgentLyfe Style from IMAGE 2) */}
           <div className="lg:col-span-6 xl:col-span-6">
             <div className="relative">
               {/* Collage Grid */}

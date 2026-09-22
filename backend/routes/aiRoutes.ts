@@ -919,7 +919,7 @@ aiRouter.post(['/ai/chat', '/api/ai/chat'], async (req, res) => {
         .join('\n')}\n`;
     }
 
-    const systemInstruction = `Tum "UrgentLyfe" ke official AI assistant ho — ek home-services platform jo plumbing, electrical, cleaning, AC repair, painting, pest control, appliance repair, salon-at-home, aur carpentry jaisi services provide karta hai (Urban Company jaisa model).
+    const systemInstruction = `Tum "UrgentLyfe" ke official AI assistant ho — ek leading home-services platform jo plumbing, electrical, cleaning, AC repair, painting, pest control, appliance repair, salon-at-home, aur carpentry jaisi services provide karta hai.
 
 ### Language Rules
 - User jis bhi language ya mix (Hindi, English, Hinglish, ya koi regional bhasha) me baat kare, tum wahi language/style match karke reply karo.
@@ -1899,4 +1899,536 @@ aiRouter.post('/ml/match-partner', (req, res) => {
     success: true,
     data: result,
   });
+});
+
+// 9. AI Smart Service Tips & Maintenance Advice (POST /api/ai/service-tips)
+aiRouter.post(['/ai/service-tips', '/api/ai/service-tips'], async (req, res) => {
+  const {
+    serviceId,
+    serviceTitle,
+    categoryId,
+    description,
+    features = [],
+    city = 'Bengaluru',
+    customQuestion,
+  } = req.body;
+
+  if (!serviceTitle && !serviceId) {
+    return res.status(400).json({ success: false, error: 'serviceTitle or serviceId is required' });
+  }
+
+  const title = serviceTitle || 'Home Service';
+  const cat = (categoryId || '').toLowerCase();
+  const lowerTitle = title.toLowerCase();
+
+  // Helper to build tailored fallback tips
+  const buildFallbackTips = () => {
+    // 1. Air Conditioner & Appliances
+    if (lowerTitle.includes('ac') || cat.includes('ac') || lowerTitle.includes('cooling') || lowerTitle.includes('filter')) {
+      return {
+        serviceId: serviceId || 'ac-service',
+        serviceTitle: title,
+        overview: `Routine maintenance of your ${title} prevents compressor overheating, cuts power spikes by up to 22%, and keeps indoor airflow allergen-free.`,
+        lifespanExpectancy: '8–12 years with bi-weekly filter care & bi-annual foam jet service vs 4–5 years with zero upkeep.',
+        maintenanceCadence: 'Rinse nylon mesh filters every 15 days; book professional deep foam cleaning every 6 months.',
+        tips: [
+          {
+            id: 'tip-1',
+            title: 'Bi-Weekly Nylon Filter Rinse',
+            tip: 'Dust-clogged filters force the compressor to draw 30% more current, choking cooling capacity and hiking electricity bills.',
+            category: 'ENERGY_COST_SAVER',
+            categoryLabel: 'Energy & Cost Saver',
+            frequency: 'Every 15 Days',
+            impactBadge: '⚡ Cuts power bills by up to 18%',
+            actionStep: 'Slide out indoor mesh filters, wash under lukewarm running tap water (no harsh detergents), air dry completely before re-inserting.',
+            proRecommendation: 'Never run the AC unit with damp or missing filters as dust will bake directly onto the cooling coils.',
+          },
+          {
+            id: 'tip-2',
+            title: 'Maintain 24°C Optimal Thermostat Rule',
+            tip: 'Setting the temperature to 18°C does not cool the room faster—it only makes the compressor run non-stop without cycling.',
+            category: 'EXTEND_LIFESPAN',
+            categoryLabel: 'Lifespan Extender',
+            frequency: 'Daily Usage',
+            impactBadge: '🛡️ Prevents compressor burnout',
+            actionStep: 'Set thermostat between 24°C–26°C with ceiling fan on low speed for uniform convective chill across the entire room.',
+            proRecommendation: 'Every 1°C increase saves roughly 6% electricity while drastically lowering compressor wear.',
+          },
+          {
+            id: 'tip-3',
+            title: 'Outdoor Condenser Clearance & Coil Check',
+            tip: 'Outdoor units placed near walls or pigeon nests trap hot exhaust air, causing high head pressure trips during peak summer.',
+            category: 'SAFETY_WARNING',
+            categoryLabel: 'Safety & Protection',
+            frequency: 'Monthly Inspection',
+            impactBadge: '⚠️ Avoids sudden emergency shutdown',
+            actionStep: 'Ensure at least 2 feet of clear space around the outdoor condenser; gently hose down loose dust from exterior fins.',
+            proRecommendation: 'If the copper pipes freeze or show white frost, turn off the AC immediately to prevent liquid refrigerant slugging.',
+          },
+          {
+            id: 'tip-4',
+            title: 'Drain Pipe Slime & Mold Flush',
+            tip: 'Condensate drain lines accumulate bacterial slime, causing dirty water to overflow indoors onto walls and electrical sockets.',
+            category: 'DIY_PREVENTIVE',
+            categoryLabel: 'DIY Preventive Care',
+            frequency: 'Quarterly',
+            impactBadge: '💧 Zero indoor water leakage',
+            actionStep: 'Pour a cup of 50/50 white vinegar and warm water into the drain tray drain hole to dissolve algae buildup.',
+            proRecommendation: 'Schedule an UrgentLyfe Foam Jet deep clean before summer to clear deep pipe blockages.',
+          },
+        ],
+        proSecret: 'Running the AC in "Fan Only" or "Dry" mode for 20 minutes before turning it off evaporates moisture on the coils, preventing foul mold odor!',
+        warningSign: 'Hissing sound near indoor unit or ice forming on copper tubing indicates refrigerant leak—turn off immediately to protect the compressor.',
+        aiGenerated: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // 2. Washing Machine & Water Appliances
+    if (lowerTitle.includes('washing') || lowerTitle.includes('dryer') || lowerTitle.includes('laundry')) {
+      return {
+        serviceId: serviceId || 'washing-machine',
+        serviceTitle: title,
+        overview: `Hard water minerals and detergent sludge degrade washing machine drum bearings and solenoid valves if not descaled regularly.`,
+        lifespanExpectancy: '10–12 years with monthly descaling vs 5–6 years with bearing failure from lime scale.',
+        maintenanceCadence: 'Empty lint/coin filter monthly; run an empty tub-clean cycle with descaling powder every 30–45 days.',
+        tips: [
+          {
+            id: 'tip-1',
+            title: 'Tub Clean Cycle with Descaling Salts',
+            tip: 'Hard water salts coat the heating element and spider arm, causing foul odors and sudden spin-cycle grinding noise.',
+            category: 'EXTEND_LIFESPAN',
+            categoryLabel: 'Lifespan Extender',
+            frequency: 'Monthly',
+            impactBadge: '🛡️ Adds 4+ years to drum life',
+            actionStep: 'Add 1 packet of citric acid or appliance descaler into the drum; run hot "Tub Clean" or 60°C cotton cycle completely empty.',
+            proRecommendation: 'Never use regular laundry detergent during a tub clean cycle to prevent excessive foam overflow into control boards.',
+          },
+          {
+            id: 'tip-2',
+            title: 'Clean Coin Trap & Debris Filter',
+            tip: 'Coins, hairpins, and loose threads collect in the bottom pump filter, jamming the impeller and causing drainage error codes (E20/OE).',
+            category: 'DIY_PREVENTIVE',
+            categoryLabel: 'DIY Preventive Care',
+            frequency: 'Every 30 Days',
+            impactBadge: '🚫 Prevents pump burnout',
+            actionStep: 'Open bottom flap, place a tray, unscrew coin filter slowly, rinse trapped debris under tap and screw back tight.',
+            proRecommendation: 'Check trouser pockets before loading to avoid metal pins puncturing the rubber door gasket.',
+          },
+          {
+            id: 'tip-3',
+            title: 'Leave Door Ajar to Prevent Mold & Mildew',
+            tip: 'Sealing the airtight door immediately after a wash cycle locks in humidity, creating black fungal spots on rubber bellows.',
+            category: 'DIY_PREVENTIVE',
+            categoryLabel: 'DIY Preventive Care',
+            frequency: 'After Every Wash',
+            impactBadge: '🌸 Fresh, odor-free laundry',
+            actionStep: 'Keep front-load door open 2–3 inches and wipe moisture off the rubber door seal with a microfiber towel.',
+            proRecommendation: 'If rubber gasket already has black spots, wipe with dilute hydrogen peroxide or baking soda paste.',
+          },
+          {
+            id: 'tip-4',
+            title: 'Avoid Overloading Weight Capacity',
+            tip: 'Overfilling the drum unbalances suspension springs and damages motor bearings, causing heavy thumping during spin cycle.',
+            category: 'SAFETY_WARNING',
+            categoryLabel: 'Safety & Protection',
+            frequency: 'Daily Usage',
+            impactBadge: '⚖️ Protects suspension struts',
+            actionStep: 'Leave one hand’s width of empty vertical space between top of clothes and top of drum ceiling.',
+            proRecommendation: 'Distribute heavy items like bedsheets evenly with lighter garments to maintain spin balance.',
+          },
+        ],
+        proSecret: 'Excess liquid detergent causes soapy residue buildup that ruins water level sensors. Always measure to the detergent cap line!',
+        warningSign: 'Loud jet-engine roaring sound during spin cycle means drum bearings have failed—book immediate service before drum jams completely.',
+        aiGenerated: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // 3. Plumbing, Drain, Leak, Bathroom Services
+    if (lowerTitle.includes('plumb') || lowerTitle.includes('drain') || lowerTitle.includes('pipe') || lowerTitle.includes('tap') || cat.includes('plumb')) {
+      return {
+        serviceId: serviceId || 'plumbing-service',
+        serviceTitle: title,
+        overview: `Timely plumbing care eliminates silent slab water seepage, scale buildup in mixer aerators, and sudden pipe bursting.`,
+        lifespanExpectancy: '15+ years for brass valves and PVC pipes with regular aerator cleaning & pressure moderation.',
+        maintenanceCadence: 'Clean faucet aerators every 2 months; test emergency isolation stop valves twice a year.',
+        tips: [
+          {
+            id: 'tip-1',
+            title: 'Vinegar Soak for Faucet Aerators',
+            tip: 'Mineral deposits choke water pressure at tap nozzles, making it look like a mainline pump failure.',
+            category: 'DIY_PREVENTIVE',
+            categoryLabel: 'DIY Preventive Care',
+            frequency: 'Every 60 Days',
+            impactBadge: '🚿 Restores full 100% water flow',
+            actionStep: 'Unscrew the tip of the tap nozzle, soak the tiny mesh screen in warm white vinegar for 30 minutes, brush off grit and reinstall.',
+            proRecommendation: 'Wrap pliers with cloth when unscrewing to prevent scratching chrome finishes.',
+          },
+          {
+            id: 'tip-2',
+            title: 'Never Pour Hot Grease Down Kitchen Sinks',
+            tip: 'Cooking oil solidifies as it cools inside P-traps, binding with coffee grounds and creating impenetrable fatbergs.',
+            category: 'EXTEND_LIFESPAN',
+            categoryLabel: 'Lifespan Extender',
+            frequency: 'Daily Habit',
+            impactBadge: '🚫 Zero stubborn drain clogs',
+            actionStep: 'Wipe oily pans with a paper towel into dustbins; pour a kettle of boiling water down the drain weekly to melt residue.',
+            proRecommendation: 'Avoid harsh sulfuric acid drain openers as they corrode older PVC joints and release toxic fumes.',
+          },
+          {
+            id: 'tip-3',
+            title: 'Locate & Exercise Main Water Shutoff Valve',
+            tip: 'In a plumbing pipe burst emergency, knowing your stop valve location stops catastrophic flooding within 30 seconds.',
+            category: 'SAFETY_WARNING',
+            categoryLabel: 'Safety & Protection',
+            frequency: 'Every 6 Months',
+            impactBadge: '🛡️ Prevents ₹50,000+ water damage',
+            actionStep: 'Turn the main isolation angle cock under sink/bathroom clockwise and back counter-clockwise once every 6 months to prevent seizing.',
+            proRecommendation: 'If an angle valve feels seized, do not force it with heavy tools—spray WD-40 or call UrgentLyfe plumber.',
+          },
+          {
+            id: 'tip-4',
+            title: 'Check Toilet Cistern Flapper for Silent Leaks',
+            tip: 'A worn rubber flush valve quietly trickles water into the bowl 24/7, wasting over 200 liters of fresh water daily.',
+            category: 'ENERGY_COST_SAVER',
+            categoryLabel: 'Energy & Cost Saver',
+            frequency: 'Quarterly Check',
+            impactBadge: '💧 Saves 6,000L of water/month',
+            actionStep: 'Drop 3 drops of food coloring into the cistern tank. If color appears in the bowl within 15 minutes without flushing, replace the flapper.',
+            proRecommendation: 'Modern dual-flush siphon seals cost under ₹200 and pay for themselves in one water bill cycle.',
+          },
+        ],
+        proSecret: 'Installing a basic stainless steel mesh sink strainer catches 95% of food waste before it ever enters your underground plumbing pipes!',
+        warningSign: 'Damp bubbling paint or white salt efflorescence on walls adjacent to bathrooms indicates hidden pipe joint leakage.',
+        aiGenerated: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // 4. Electrical, Switchboard, Fan, MCB
+    if (lowerTitle.includes('electr') || lowerTitle.includes('fan') || lowerTitle.includes('wiring') || lowerTitle.includes('mcb') || cat.includes('electr')) {
+      return {
+        serviceId: serviceId || 'electrical-service',
+        serviceTitle: title,
+        overview: `Preventive electrical maintenance prevents dangerous loose terminal sparking, short-circuit fire risks, and appliance surge damage.`,
+        lifespanExpectancy: '20+ years for concealed copper wiring; 7–10 years for ceiling fans and MCBs with proper load balancing.',
+        maintenanceCadence: 'Dust fan blades bi-monthly; test RCCB/ELCB trip button once a month; check heavy appliance plug pins quarterly.',
+        tips: [
+          {
+            id: 'tip-1',
+            title: 'Monthly Test of RCCB Earth Leakage Trip',
+            tip: 'The Residual Current Circuit Breaker (RCCB) on your main distribution board protects human life from fatal shocks.',
+            category: 'SAFETY_WARNING',
+            categoryLabel: 'Safety & Protection',
+            frequency: 'Monthly',
+            impactBadge: '⚡ 100% Electric shock protection',
+            actionStep: 'Press the "T" (Test) button on the RCCB breaker. It must immediately snap OFF. If it doesn’t trip, internal mechanism is faulty.',
+            proRecommendation: 'If RCCB does not trip on test, replace it immediately. It is your household’s primary defense against electrocution.',
+          },
+          {
+            id: 'tip-2',
+            title: 'Clean Ceiling Fan Blades to Stop Wobble & Hum',
+            tip: 'Heavy dust buildup on leading edges imbalances blade aerodynamics, wearing out ball bearings and creating high-pitched buzzing.',
+            category: 'EXTEND_LIFESPAN',
+            categoryLabel: 'Lifespan Extender',
+            frequency: 'Monthly',
+            impactBadge: '🌀 Silent breeze & bearing longevity',
+            actionStep: 'Slide an old pillowcase over each blade and pull backward to capture dust without scattering grime into the room.',
+            proRecommendation: 'Never pull down on fan blades while cleaning as bent blades cause permanent wobbling that shakes ceiling fasteners.',
+          },
+          {
+            id: 'tip-3',
+            title: 'Avoid Multi-Plug Adapters on High-Wattage Sockets',
+            tip: 'Daisy-chaining multiple heaters, irons, or microwaves on a single 16A socket causes thermal pin deformation and melt fires.',
+            category: 'SAFETY_WARNING',
+            categoryLabel: 'Safety & Protection',
+            frequency: 'Ongoing Habit',
+            impactBadge: '🔥 Zero switchboard burnout risk',
+            actionStep: 'Dedicate direct 16A wall sockets with ceramic or heavy brass terminals for appliances above 1500 Watts.',
+            proRecommendation: 'If a plug pin feels warm to the touch after 10 minutes of use, internal socket contacts have loosened and need replacement.',
+          },
+          {
+            id: 'tip-4',
+            title: 'Surge Protection for Smart Electronics & TVs',
+            tip: 'Grid voltage spikes in Indian cities during lightning or power restoration damage delicate smart board inverter circuits.',
+            category: 'ENERGY_COST_SAVER',
+            categoryLabel: 'Energy & Cost Saver',
+            frequency: 'One-Time Setup',
+            impactBadge: '🛡️ Guards ₹40,000+ smart devices',
+            actionStep: 'Plug OLED TVs, gaming consoles, and laptops into spike busters equipped with MOV (Metal Oxide Varistor) surge suppression.',
+            proRecommendation: 'During heavy monsoon thunderstorms, physically unplug auxiliary antennas and HDMI cables from wall outlets.',
+          },
+        ],
+        proSecret: 'A faint fishy or burnt plastic smell near a switchboard is the telltale signature of overheated terminal insulation—switch off the main MCB!',
+        warningSign: 'Sparks when inserting a plug or frequent flickering of LED bulbs indicates loose neutral wiring in the junction box.',
+        aiGenerated: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // 5. Cleaning, Pest Control, Sofa, Kitchen
+    if (lowerTitle.includes('clean') || lowerTitle.includes('pest') || lowerTitle.includes('sofa') || lowerTitle.includes('deep clean') || cat.includes('clean')) {
+      return {
+        serviceId: serviceId || 'cleaning-service',
+        serviceTitle: title,
+        overview: `Professional maintenance and proactive sanitation keep living spaces allergen-free, extend upholstery fabric luster, and deter pest colonization.`,
+        lifespanExpectancy: 'Maintains sofa fabric texture and tile grout brightness for 8–10 years; keeps pests away for 6+ months.',
+        maintenanceCadence: 'Vacuum upholstery fortnightly; wipe kitchen surfaces daily; deep clean tile grout every 4–6 months.',
+        tips: [
+          {
+            id: 'tip-1',
+            title: 'Immediate Blotting for Upholstery Spills',
+            tip: 'Rubbing a wet spill pushes tea, coffee, or food oil deeper into cushion foam fibers, locking in permanent discoloration.',
+            category: 'DIY_PREVENTIVE',
+            categoryLabel: 'DIY Preventive Care',
+            frequency: 'Immediate When Spilled',
+            impactBadge: '✨ Zero permanent fabric stains',
+            actionStep: 'Press clean paper towels firmly against the spill to absorb liquid. Dab gently from outside towards center with diluted mild dish soap.',
+            proRecommendation: 'Never use bleaching agents or hot water on velvet, suede, or dyed linen fabrics.',
+          },
+          {
+            id: 'tip-2',
+            title: 'Dry Kitchen Sinks & Counter Gaps at Night',
+            tip: 'German cockroaches thrive on standing water droplets and food crumbs trapped in silicone countertop corners.',
+            category: 'EXTEND_LIFESPAN',
+            categoryLabel: 'Lifespan Extender',
+            frequency: 'Every Night',
+            impactBadge: '🪳 95% Pest deterrence rate',
+            actionStep: 'Wipe kitchen sinks dry with a microfiber towel and seal food scraps in tightly closed trash bins before bed.',
+            proRecommendation: 'Pests can survive a month without food, but only days without water—drying sinks breaks their breeding cycle.',
+          },
+          {
+            id: 'tip-3',
+            title: 'Baking Soda Deodorizer for Mattresses & Rugs',
+            tip: 'Mattresses absorb human body perspiration and dust mites, leading to musty odors and morning sneezing fits.',
+            category: 'ENERGY_COST_SAVER',
+            categoryLabel: 'Energy & Cost Saver',
+            frequency: 'Every Month',
+            impactBadge: '🍃 100% Natural odor neutralization',
+            actionStep: 'Sprinkle light layer of baking soda over mattress, let sit for 45 minutes to absorb moisture and odor, then vacuum thoroughly.',
+            proRecommendation: 'Flip or rotate mattresses 180 degrees every 3 months to prevent body impression sagging.',
+          },
+          {
+            id: 'tip-4',
+            title: 'Maintain 2-Hour Post-Pest Ventilation Window',
+            tip: 'Professional gel and spray treatments need proper ventilation once initial surface contact time has elapsed.',
+            category: 'SAFETY_WARNING',
+            categoryLabel: 'Safety & Protection',
+            frequency: 'Post-Treatment',
+            impactBadge: '🛡️ Safe for kids & pets',
+            actionStep: 'Keep doors and windows wide open for 1–2 hours after returning home; do not wipe off gel bait dots placed inside kitchen cabinets.',
+            proRecommendation: 'Do not spray common chemical aerosol sprays near professional bait gel spots as it contaminates the bait attraction.',
+          },
+        ],
+        proSecret: 'Wiping bathroom glass partitions with a silicone squeegee after each shower takes 20 seconds and completely prevents hard water limescale etching!',
+        warningSign: 'Hollow sound when tapping wooden door frames or tiny mud tubes in corners indicates active subterranean termite movement.',
+        aiGenerated: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // 6. Salon, Grooming, Spa, Wellness
+    if (lowerTitle.includes('salon') || lowerTitle.includes('massage') || lowerTitle.includes('spa') || lowerTitle.includes('hair') || lowerTitle.includes('facial') || cat.includes('salon')) {
+      return {
+        serviceId: serviceId || 'salon-service',
+        serviceTitle: title,
+        overview: `Post-treatment care locks in botanical nutrients, extends facial glow, prevents follicular irritation, and maximizes relaxation benefits.`,
+        lifespanExpectancy: 'Extends radiant facial glow from 3 days to 14+ days; prolongs hair smoothening and manicure durability.',
+        maintenanceCadence: 'Hydrate skin daily with SPF 50+; apply sulfate-free conditioner post-wash; schedule touchups every 4–6 weeks.',
+        tips: [
+          {
+            id: 'tip-1',
+            title: 'The 24-Hour Post-Facial Sunscreen & Steam Rule',
+            tip: 'Exfoliated skin and open pores are highly vulnerable to UV hyperpigmentation and pollution particles immediately after a deep facial.',
+            category: 'EXTEND_LIFESPAN',
+            categoryLabel: 'Lifespan Extender',
+            frequency: 'First 24–48 Hours',
+            impactBadge: '🌟 Doubles natural facial glow',
+            actionStep: 'Avoid direct sunlight, steam rooms, swimming pools, or applying heavy makeup for 24 hours. Apply a broad-spectrum SPF 50+ sunscreen.',
+            proRecommendation: 'Wash face only with cool or lukewarm water for the first 2 days—avoid harsh physical scrubs.',
+          },
+          {
+            id: 'tip-2',
+            title: 'Hydrate Heavily Post Deep Tissue & Spa Therapy',
+            tip: 'Deep myofascial massage releases metabolic waste and lactic acid from tense muscle knots into your bloodstream.',
+            category: 'DIY_PREVENTIVE',
+            categoryLabel: 'DIY Preventive Care',
+            frequency: 'Immediate & Next 24h',
+            impactBadge: '💧 Eliminates next-day muscle soreness',
+            actionStep: 'Drink 2–3 large glasses of warm water or electrolyte coconut water over the next 4 hours to flush out released toxins.',
+            proRecommendation: 'A warm epsom salt bath 6 hours after massage prevents localized stiffness and deepens muscle recovery.',
+          },
+          {
+            id: 'tip-3',
+            title: 'Use Sulfate-Free Shampoos After Hair Spa / Keratin',
+            tip: 'Commercial sulfates (SLS/SLES) strip protein coats and natural lipids, turning treated silky hair rough within 2 washes.',
+            category: 'ENERGY_COST_SAVER',
+            categoryLabel: 'Energy & Cost Saver',
+            frequency: 'Every Wash',
+            impactBadge: '✨ Retains salon finish for 8+ weeks',
+            actionStep: 'Switch to a gentle pH-balanced sulfate and paraben-free shampoo, and always rinse with cool water to lock hair cuticles.',
+            proRecommendation: 'Do not tie hair into tight rubber bands or ponytails for 48 hours following a blowout or smoothening session.',
+          },
+          {
+            id: 'tip-4',
+            title: 'Apply Cuticle Oil Post Manicure / Pedicure',
+            tip: 'Dry air and soap strip oils from nail beds, leading to chipped polish and painful ragged cuticles.',
+            category: 'DIY_PREVENTIVE',
+            categoryLabel: 'DIY Preventive Care',
+            frequency: 'Every Night',
+            impactBadge: '💅 Chip-free nails for 2+ weeks',
+            actionStep: 'Massage a drop of jojoba or almond cuticle oil into nail bases before bedtime to nourish matrix growth.',
+            proRecommendation: 'Wear rubber gloves when washing dishes with detergent to protect nail enamel from chipping.',
+          },
+        ],
+        proSecret: 'Sleeping on a satin or silk pillowcase prevents facial friction wrinkles and eliminates morning hair frizz by 70%!',
+        warningSign: 'Any burning sensation or persistent red rash after chemical peeling warrants cold milk compresses and dermatologist consultation.',
+        aiGenerated: false,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // 7. General Default Fallback
+    return {
+      serviceId: serviceId || 'home-service',
+      serviceTitle: title,
+      overview: `Regular care and timely preventative maintenance for ${title} preserve performance, lower long-term repair costs, and ensure safety.`,
+      lifespanExpectancy: 'Consistently extends functional lifespan by 40%–60% compared to neglected systems.',
+      maintenanceCadence: 'Inspect monthly; clean dust and filters regularly; book verified UrgentLyfe checkup every 6–12 months.',
+      tips: [
+        {
+          id: 'tip-1',
+          title: 'Schedule Periodic Preventive Checkups',
+          tip: 'Small minor noises, loose screws, and slight resistance are early warnings of impending total component failure.',
+          category: 'EXTEND_LIFESPAN',
+          categoryLabel: 'Lifespan Extender',
+          frequency: 'Quarterly',
+          impactBadge: '🛡️ Prevents 80% sudden breakdowns',
+          actionStep: 'Inspect joints, moving parts, and surface seals. Tighten loose fasteners and note any unusual vibration.',
+          proRecommendation: 'Address minor anomalies immediately before they cascade into high-cost repairs.',
+        },
+        {
+          id: 'tip-2',
+          title: 'Keep Equipment Dry & Well-Ventilated',
+          tip: 'Trapped indoor moisture and dust build-up create oxidation rust and electrical leakage.',
+          category: 'SAFETY_WARNING',
+          categoryLabel: 'Safety & Protection',
+          frequency: 'Monthly',
+          impactBadge: '⚡ Zero corrosion or short circuits',
+          actionStep: 'Ensure adequate air circulation around fixtures and wipe down ambient condensation with clean microfiber.',
+          proRecommendation: 'Never store flammable chemicals or solvents close to operational machinery.',
+        },
+        {
+          id: 'tip-3',
+          title: 'Energy Efficiency Optimization',
+          tip: 'Operating appliances within recommended factory parameters avoids wasteful electrical or water consumption.',
+          category: 'ENERGY_COST_SAVER',
+          categoryLabel: 'Energy & Cost Saver',
+          frequency: 'Daily Usage',
+          impactBadge: '💰 Lowers utility expenses by 15%',
+          actionStep: 'Turn off standby power switches when not in use and operate within moderate manufacturer ratings.',
+          proRecommendation: 'Utilize eco or smart timer modes whenever available.',
+        },
+        {
+          id: 'tip-4',
+          title: 'DIY Safe Cleaning Routine',
+          tip: 'Harsh abrasive chemicals degrade protective factory clearcoats and rubber insulation.',
+          category: 'DIY_PREVENTIVE',
+          categoryLabel: 'DIY Preventive Care',
+          frequency: 'Bi-Weekly',
+          impactBadge: '✨ Maintains pristine factory finish',
+          actionStep: 'Use mild pH-neutral soapy water and soft lint-free cloths for regular surface sanitization.',
+          proRecommendation: 'Always disconnect main power supplies before performing any cleaning or wiping routines.',
+        },
+      ],
+      proSecret: 'Keep all service receipts and warranty records in your UrgentLyfe dashboard for instant 30-day rework protection!',
+      warningSign: 'Unusual grinding sounds, excessive heat, or strange odors indicate immediate servicing is required.',
+      aiGenerated: false,
+      timestamp: new Date().toISOString(),
+    };
+  };
+
+  // If Gemini API is not configured, return high-quality crafted fallback immediately
+  if (!hasGeminiKey()) {
+    const fallback = buildFallbackTips();
+    return res.json({
+      success: true,
+      data: fallback,
+    });
+  }
+
+  // Gemini AI Generation
+  try {
+    const prompt = `You are a certified master technician and home maintenance engineer at UrgentLyfe, India's leading home service platform.
+Generate intelligent, highly practical 'Smart Service Tips' and maintenance advice for the service: "${title}" (Category: "${cat || 'Home Services'}", City: "${city}").
+
+${customQuestion ? `The customer also asked this specific maintenance question: "${customQuestion}". Be sure to address it thoroughly in the advice or as a custom tip.` : ''}
+
+Return a valid JSON object matching this schema:
+{
+  "serviceId": "${serviceId || 'srv-custom'}",
+  "serviceTitle": "${title}",
+  "overview": "A punchy 2-sentence summary explaining why proactive maintenance of this service/appliance saves money, improves safety, and maintains peak performance in Indian conditions (dust, hard water, monsoon humidity, voltage spikes).",
+  "lifespanExpectancy": "Specific lifespan comparison with regular upkeep vs without (e.g., '10-12 years with routine care vs 4-5 years if neglected')",
+  "maintenanceCadence": "Clear recommended routine schedule (e.g. 'DIY filter rinse every 15 days, professional deep clean every 6 months')",
+  "tips": [
+    {
+      "id": "tip-1",
+      "title": "Actionable, catchy title (e.g. 'Bi-Weekly Filter Rinse')",
+      "tip": "Clear explanation of the problem, mechanism, and why this matters.",
+      "category": "One of ['DIY_PREVENTIVE', 'EXTEND_LIFESPAN', 'ENERGY_COST_SAVER', 'SAFETY_WARNING']",
+      "categoryLabel": "Human friendly label e.g. 'DIY Preventive Care' or 'Energy & Cost Saver'",
+      "frequency": "How often to do it (e.g. 'Every 15 Days', 'Monthly', 'Post-Service', 'Before Summer')",
+      "impactBadge": "Quantifiable benefit badge with emoji (e.g. '⚡ Cuts power bills by up to 18%', '🛡️ Prevents motor burnout', '💧 Saves 200L water/day')",
+      "actionStep": "Crisp, step-by-step instruction a homeowner can safely perform in 2 minutes.",
+      "proRecommendation": "Insider technician caution or tip to avoid common mistakes."
+    }
+  ],
+  "proSecret": "A clever, non-obvious technician insider secret that most homeowners do not know.",
+  "warningSign": "The #1 critical red flag or symptom indicating the customer must immediately stop usage and book an emergency professional.",
+  "aiGenerated": true
+}
+
+Generate exactly 4 comprehensive, distinct, realistic tips (covering DIY care, energy/cost savings, lifespan extension, and safety/warning). Ensure realistic Indian context (e.g. hard water, heat, power fluctuations, dust).`;
+
+    const rawText = await generateGeminiContent({
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.4,
+      },
+      preferredModel: 'gemini-3.8-flash',
+      timeoutMs: 12000,
+    });
+
+    const parsed = cleanJsonResponse(rawText || '{}');
+
+    if (parsed && Array.isArray(parsed.tips) && parsed.tips.length > 0) {
+      return res.json({
+        success: true,
+        data: {
+          ...parsed,
+          serviceId: serviceId || parsed.serviceId || 'srv-1',
+          serviceTitle: title,
+          aiGenerated: true,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+
+    // Fallback if parsing didn't return valid tips array
+    const fallback = buildFallbackTips();
+    return res.json({
+      success: true,
+      data: { ...fallback, aiGenerated: false },
+    });
+  } catch (err: any) {
+    console.warn('Gemini smart service tips failed, using fallback:', err.message);
+    const fallback = buildFallbackTips();
+    return res.json({
+      success: true,
+      data: fallback,
+    });
+  }
 });

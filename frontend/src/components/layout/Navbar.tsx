@@ -16,6 +16,11 @@ import {
   Plus,
   Check,
   XCircle,
+  Navigation,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Compass,
 } from 'lucide-react';
 import { City, User, ProviderProfile, ServiceItem, Category } from '../../types';
 import { searchServices } from '../../utils/searchHelper';
@@ -41,6 +46,11 @@ interface NavbarProps {
   onOpenCart: () => void;
   walletBalance: number;
   onQuickSOS: () => void;
+  // Geolocation & Auto-detection
+  onDetectLocation?: () => Promise<void> | void;
+  isDetectingLocation?: boolean;
+  detectionMessage?: { text: string; type: 'success' | 'error' | 'info' } | null;
+  onClearDetectionMessage?: () => void;
   // Auth & Roles Props
   currentUser: User | null;
   providerProfile?: ProviderProfile | null;
@@ -114,8 +124,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenMyBookings,
   onNavigateHome,
   onNavigateServices,
+  onDetectLocation,
+  isDetectingLocation = false,
+  detectionMessage = null,
+  onClearDetectionMessage,
 }) => {
   const [isCityOpen, setIsCityOpen] = useState(false);
+  const [locationSearch, setLocationSearch] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -247,6 +262,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Services
               </button>
               <button
+                onClick={() => {
+                  const el = document.getElementById('city-explorer-section');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-3 py-1.5 rounded-lg hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <Compass className="w-3.5 h-3.5 text-blue-600" />
+                <span>City Explorer</span>
+              </button>
+              <button
                 onClick={onQuickSOS}
                 className="px-3 py-1.5 rounded-lg text-amber-700 hover:bg-amber-50 font-bold transition-colors cursor-pointer flex items-center gap-1"
               >
@@ -256,7 +281,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </nav>
           </div>
 
-          {/* 2. CENTER: Location Selector & Urban Company Style Search Bar */}
+          {/* 2. CENTER: Location Selector & UrgentLyfe Style Search Bar */}
           <div className="hidden md:flex items-center flex-1 max-w-2xl lg:max-w-3xl mx-2 lg:mx-4 gap-2">
             
             {/* Location Selector Pill */}
@@ -264,75 +289,269 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="location-picker-btn"
                 onClick={() => setIsCityOpen(!isCityOpen)}
-                className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-300 transition-all cursor-pointer shadow-2xs max-w-[150px] lg:max-w-[180px]"
-                title="Change Location"
+                className={`flex items-center gap-1.5 text-slate-800 text-xs font-semibold px-3 py-2.5 rounded-xl border transition-all cursor-pointer shadow-2xs max-w-[160px] lg:max-w-[200px] ${
+                  isDetectingLocation
+                    ? 'bg-blue-50 border-blue-400 text-blue-800 animate-pulse'
+                    : 'bg-slate-50 hover:bg-slate-100 border-slate-300'
+                }`}
+                title="Change Service Location"
               >
-                <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                <span className="truncate">{displayLocation}</span>
+                {isDetectingLocation ? (
+                  <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin shrink-0" />
+                ) : (
+                  <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                )}
+                <span className="truncate">
+                  {isDetectingLocation ? 'Detecting...' : displayLocation}
+                </span>
                 <ChevronDown className="w-3 h-3 text-slate-400 shrink-0 ml-auto" />
               </button>
 
-              {/* Location Dropdown Modal */}
+              {/* Desktop Location Dropdown */}
               {isCityOpen && (
-                <div className="absolute left-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 z-50 animate-fadeIn">
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                    <span className="text-xs font-bold text-slate-800">Select City & Locality</span>
+                <div className="absolute left-0 mt-2 w-84 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 animate-fadeIn">
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs font-extrabold text-slate-900">Select Service Location</span>
+                    </div>
                     <button
                       onClick={() => setIsCityOpen(false)}
-                      className="text-xs text-slate-400 hover:text-slate-600 font-bold"
+                      className="text-xs text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                       ✕
                     </button>
                   </div>
 
-                  <div className="max-h-48 overflow-y-auto space-y-1 mb-3">
-                    {cities.map((city) => (
-                      <button
-                        key={city.id}
-                        onClick={() => {
-                          onSelectCity(city);
-                          onSelectLocality(city.localities[0] || '');
-                        }}
-                        className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
-                          city.id === selectedCity.id
-                            ? 'bg-blue-50 text-blue-700 font-bold'
-                            : 'text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span>{city.name}</span>
-                        {city.popular && (
-                          <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-semibold">
-                            Popular
-                          </span>
+                  {/* 1. Browser Geolocation GPS Auto-Detect Button */}
+                  {onDetectLocation && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onDetectLocation();
+                      }}
+                      disabled={isDetectingLocation}
+                      className="w-full flex items-center justify-between p-2.5 mb-3 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 rounded-xl border border-blue-200/80 text-xs font-semibold transition-all group cursor-pointer shadow-2xs disabled:opacity-80"
+                    >
+                      <div className="flex items-center gap-2.5 text-left">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                          {isDetectingLocation ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Navigation className="w-3.5 h-3.5" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 leading-tight flex items-center gap-1.5">
+                            <span>{isDetectingLocation ? 'Detecting your location...' : 'Use current location'}</span>
+                            {isDetectingLocation && (
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
+                            )}
+                          </p>
+                          <p className="text-[10px] text-blue-700 font-medium">
+                            Auto-detect city & locality via GPS
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-wider text-blue-700 bg-white px-2 py-0.5 rounded-md border border-blue-200 shadow-2xs">
+                        GPS
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Detection Feedback Message */}
+                  {detectionMessage && (
+                    <div
+                      className={`mb-3 p-2.5 rounded-xl border flex items-start justify-between gap-2 text-xs animate-fadeIn ${
+                        detectionMessage.type === 'success'
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                          : 'bg-rose-50 border-rose-200 text-rose-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {detectionMessage.type === 'success' ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                         )}
+                        <span className="text-[11px] font-medium leading-snug">
+                          {detectionMessage.text}
+                        </span>
+                      </div>
+                      {onClearDetectionMessage && (
+                        <button
+                          type="button"
+                          onClick={onClearDetectionMessage}
+                          className="text-slate-400 hover:text-slate-600 text-xs shrink-0"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Search City / Locality Input */}
+                  <div className="relative mb-3">
+                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={locationSearch}
+                      onChange={(e) => setLocationSearch(e.target.value)}
+                      placeholder="Search city or area (e.g. Indiranagar, Bandra)..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                    />
+                    {locationSearch && (
+                      <button
+                        onClick={() => setLocationSearch('')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                      >
+                        ✕
                       </button>
-                    ))}
+                    )}
                   </div>
 
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Locality</p>
-                  <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-                    {selectedCity.localities.map((loc) => (
-                      <button
-                        key={loc}
-                        onClick={() => {
-                          onSelectLocality(loc);
-                          setIsCityOpen(false);
-                        }}
-                        className={`text-[11px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                          loc === selectedLocality
-                            ? 'bg-blue-600 text-white border-blue-600 font-semibold'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-                        }`}
-                      >
-                        {loc}
-                      </button>
-                    ))}
-                  </div>
+                  {/* Filtered Search Results */}
+                  {locationSearch.trim().length > 0 ? (
+                    <div className="max-h-56 overflow-y-auto space-y-1 divide-y divide-slate-100">
+                      {(() => {
+                        const q = locationSearch.toLowerCase().trim();
+                        const matches: { city: City; locality: string; isCityMatch?: boolean }[] = [];
+                        
+                        cities.forEach((c) => {
+                          if (c.name.toLowerCase().includes(q)) {
+                            matches.push({ city: c, locality: c.localities[0] || 'Center', isCityMatch: true });
+                          }
+                          c.localities.forEach((loc) => {
+                            if (loc.toLowerCase().includes(q)) {
+                              matches.push({ city: c, locality: loc });
+                            }
+                          });
+                        });
+
+                        if (matches.length === 0) {
+                          return (
+                            <div className="py-6 text-center text-slate-400 text-xs">
+                              No cities or localities matching &quot;{locationSearch}&quot;
+                            </div>
+                          );
+                        }
+
+                        return matches.slice(0, 8).map((m, idx) => (
+                          <button
+                            key={`${m.city.id}-${m.locality}-${idx}`}
+                            onClick={() => {
+                              onSelectCity(m.city);
+                              onSelectLocality(m.locality);
+                              setLocationSearch('');
+                              setIsCityOpen(false);
+                            }}
+                            className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs flex items-center justify-between cursor-pointer transition-colors"
+                          >
+                            <div>
+                              <span className="font-bold text-slate-800">{m.locality}</span>
+                              <span className="text-slate-500 text-[10px] ml-1">
+                                in {m.city.name}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-1.5 py-0.5 rounded">
+                              Select
+                            </span>
+                          </button>
+                        ));
+                      })()}
+                    </div>
+                  ) : (
+                    <>
+                      {/* City Selector Tabs */}
+                      <div className="mb-2.5">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                          <span>Select City</span>
+                          <span className="text-[9px] text-slate-400 font-normal">{cities.length} cities available</span>
+                        </p>
+                        <div className="max-h-36 overflow-y-auto space-y-0.5 pr-1">
+                          {cities.map((city) => (
+                            <button
+                              key={city.id}
+                              onClick={() => {
+                                onSelectCity(city);
+                                onSelectLocality(city.localities[0] || '');
+                              }}
+                              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between cursor-pointer ${
+                                city.id === selectedCity.id
+                                  ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200'
+                                  : 'text-slate-600 hover:bg-slate-50 border border-transparent'
+                              }`}
+                            >
+                              <span>{city.name}</span>
+                              <div className="flex items-center gap-1">
+                                {city.popular && (
+                                  <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-semibold">
+                                    Popular
+                                  </span>
+                                )}
+                                {city.id === selectedCity.id && (
+                                  <Check className="w-3 h-3 text-blue-600" />
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Locality Selector Grid for Selected City */}
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                          <span>Popular Localities in {selectedCity.name}</span>
+                          <span className="text-[9px] text-blue-600 font-semibold">Instant 30m SOS</span>
+                        </p>
+                        <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto pr-1">
+                          {selectedCity.localities.map((loc) => (
+                            <button
+                              key={loc}
+                              onClick={() => {
+                                onSelectLocality(loc);
+                                setIsCityOpen(false);
+                              }}
+                              className={`text-[11px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                loc === selectedLocality
+                                  ? 'bg-blue-600 text-white border-blue-600 font-semibold shadow-2xs'
+                                  : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300 hover:bg-blue-50/50'
+                              }`}
+                            >
+                              {loc}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Quick City Explorer Link in Dropdown */}
+                      <div className="mt-3 pt-2.5 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsCityOpen(false);
+                            setTimeout(() => {
+                              const el = document.getElementById('city-explorer-section');
+                              el?.scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                          }}
+                          className="w-full py-1.5 px-2 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-800 rounded-lg text-xs font-bold flex items-center justify-between transition-colors cursor-pointer"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <Compass className="w-3.5 h-3.5 text-blue-600" />
+                            <span>City Explorer for {selectedCity.name}</span>
+                          </span>
+                          <span className="text-[10px] text-blue-600 font-semibold">View Top Services →</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* URBAN COMPANY STYLE SEARCH BAR */}
+            {/* URGENTLYFE STYLE SEARCH BAR */}
             <div ref={searchContainerRef} className="flex-1 relative">
               <form
                 onSubmit={handleSearchSubmit}
@@ -368,7 +587,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </form>
 
-              {/* URBAN COMPANY STYLE LIVE SEARCH DROPDOWN */}
+              {/* URGENTLYFE STYLE LIVE SEARCH DROPDOWN */}
               {isSearchFocused && searchQuery.trim().length > 0 && (
                 <div className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200/95 overflow-hidden z-50 animate-fadeIn">
                   
@@ -625,10 +844,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsCityOpen(!isCityOpen)}
-              className="flex-1 flex items-center gap-1.5 text-xs text-slate-700 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200"
+              className={`flex-1 flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border transition-all ${
+                isDetectingLocation
+                  ? 'bg-blue-50 border-blue-400 text-blue-800 animate-pulse'
+                  : 'bg-slate-50 text-slate-700 border-slate-200'
+              }`}
             >
-              <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span className="truncate font-medium">{displayLocation}</span>
+              {isDetectingLocation ? (
+                <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin shrink-0" />
+              ) : (
+                <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+              )}
+              <span className="truncate">{isDetectingLocation ? 'Detecting location...' : displayLocation}</span>
               <ChevronDown className="w-3 h-3 text-slate-400 ml-auto" />
             </button>
 
@@ -640,6 +867,253 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>30m SOS</span>
             </button>
           </div>
+
+          {/* Mobile Location Picker Bottom Sheet / Modal */}
+          {isCityOpen && (
+            <div
+              className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex flex-col justify-end p-0 animate-fadeIn"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setIsCityOpen(false);
+              }}
+            >
+              <div className="bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto p-4 shadow-2xl border-t border-slate-200 animate-slideUp">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold text-slate-900 leading-tight">
+                        Select Service Location
+                      </h4>
+                      <p className="text-[10px] text-slate-500">
+                        Doorstep services & 30m SOS dispatch
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsCityOpen(false)}
+                    className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 text-sm font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* 1. GPS Auto-Detect Button */}
+                {onDetectLocation && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onDetectLocation();
+                    }}
+                    disabled={isDetectingLocation}
+                    className="w-full flex items-center justify-between p-3 mb-3 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 hover:from-blue-100 text-blue-950 rounded-2xl border border-blue-200 text-xs font-semibold shadow-xs disabled:opacity-80"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        {isDetectingLocation ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Navigation className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 leading-tight flex items-center gap-1.5">
+                          <span>{isDetectingLocation ? 'Detecting your location...' : 'Use current location'}</span>
+                          {isDetectingLocation && (
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
+                          )}
+                        </p>
+                        <p className="text-[10px] text-blue-700 font-medium">
+                          Auto-detect city & locality via GPS
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-black uppercase tracking-wider text-blue-700 bg-white px-2 py-0.5 rounded-md border border-blue-200">
+                      GPS
+                    </span>
+                  </button>
+                )}
+
+                {/* Detection Feedback Message */}
+                {detectionMessage && (
+                  <div
+                    className={`mb-3 p-2.5 rounded-xl border flex items-start justify-between gap-2 text-xs ${
+                      detectionMessage.type === 'success'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-rose-50 border-rose-200 text-rose-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {detectionMessage.type === 'success' ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      )}
+                      <span className="text-[11px] font-medium leading-snug">
+                        {detectionMessage.text}
+                      </span>
+                    </div>
+                    {onClearDetectionMessage && (
+                      <button
+                        type="button"
+                        onClick={onClearDetectionMessage}
+                        className="text-slate-400 hover:text-slate-600 text-xs shrink-0"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Search City / Locality Input */}
+                <div className="relative mb-3">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    placeholder="Search city or area (e.g. Indiranagar, Bandra)..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8.5 pr-7 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white"
+                  />
+                  {locationSearch && (
+                    <button
+                      onClick={() => setLocationSearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Filtered Search Results */}
+                {locationSearch.trim().length > 0 ? (
+                  <div className="max-h-60 overflow-y-auto space-y-1 divide-y divide-slate-100">
+                    {(() => {
+                      const q = locationSearch.toLowerCase().trim();
+                      const matches: { city: City; locality: string }[] = [];
+                      
+                      cities.forEach((c) => {
+                        if (c.name.toLowerCase().includes(q)) {
+                          matches.push({ city: c, locality: c.localities[0] || 'Center' });
+                        }
+                        c.localities.forEach((loc) => {
+                          if (loc.toLowerCase().includes(q)) {
+                            matches.push({ city: c, locality: loc });
+                          }
+                        });
+                      });
+
+                      if (matches.length === 0) {
+                        return (
+                          <div className="py-6 text-center text-slate-400 text-xs">
+                            No cities or localities matching &quot;{locationSearch}&quot;
+                          </div>
+                        );
+                      }
+
+                      return matches.slice(0, 10).map((m, idx) => (
+                        <button
+                          key={`mobile-${m.city.id}-${m.locality}-${idx}`}
+                          onClick={() => {
+                            onSelectCity(m.city);
+                            onSelectLocality(m.locality);
+                            setLocationSearch('');
+                            setIsCityOpen(false);
+                          }}
+                          className="w-full text-left p-2.5 hover:bg-blue-50 rounded-xl text-xs flex items-center justify-between cursor-pointer"
+                        >
+                          <div>
+                            <span className="font-bold text-slate-900">{m.locality}</span>
+                            <span className="text-slate-500 text-[10px] ml-1">
+                              in {m.city.name}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-md">
+                            Select
+                          </span>
+                        </button>
+                      ));
+                    })()}
+                  </div>
+                ) : (
+                  <>
+                    {/* City Selector Tabs */}
+                    <div className="mb-3">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                        Select City
+                      </p>
+                      <div className="flex gap-1.5 overflow-x-auto pb-1.5 no-scrollbar">
+                        {cities.map((city) => (
+                          <button
+                            key={`mobile-tab-${city.id}`}
+                            onClick={() => {
+                              onSelectCity(city);
+                              onSelectLocality(city.localities[0] || '');
+                            }}
+                            className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                              city.id === selectedCity.id
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                                : 'bg-slate-50 text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            {city.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Localities for Selected City */}
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                        Localities in {selectedCity.name}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto">
+                        {selectedCity.localities.map((loc) => (
+                          <button
+                            key={`mobile-loc-${loc}`}
+                            onClick={() => {
+                              onSelectLocality(loc);
+                              setIsCityOpen(false);
+                            }}
+                            className={`text-xs px-2.5 py-1 rounded-xl border transition-all ${
+                              loc === selectedLocality
+                                ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-2xs'
+                                : 'bg-white text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            {loc}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quick City Explorer Link in Mobile Picker */}
+                    <div className="pt-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCityOpen(false);
+                          setTimeout(() => {
+                            const el = document.getElementById('city-explorer-section');
+                            el?.scrollIntoView({ behavior: 'smooth' });
+                          }, 100);
+                        }}
+                        className="w-full py-2 px-3 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 text-blue-900 rounded-xl text-xs font-bold flex items-center justify-between transition-colors"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <Compass className="w-4 h-4 text-blue-600" />
+                          <span>Explore Top Services in {selectedCity.name}</span>
+                        </span>
+                        <span className="text-[11px] text-blue-600 font-extrabold">View →</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           {isMobileSearchOpen && (
             <div className="relative animate-fadeIn">

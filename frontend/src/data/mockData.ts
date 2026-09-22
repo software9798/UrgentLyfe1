@@ -245,12 +245,12 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: 'cleaning',
-    name: 'Home Cleaning',
+    name: 'Cleaning & Pest Control',
     slug: 'cleaning',
     icon: 'Sparkles',
-    description: 'Deep cleaning, bathroom, kitchen scrubbing & sofas (Starts ₹399)',
+    description: 'Bathroom, Kitchen, Full Home, Termite Control & Leak Sealing',
     popular: true,
-    serviceCount: 16,
+    serviceCount: 24,
   },
   {
     id: 'pest-control',

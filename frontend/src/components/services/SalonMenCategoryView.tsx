@@ -1068,7 +1068,7 @@ export const SalonMenCategoryView: React.FC<SalonMenCategoryViewProps> = ({
   return (
     <div className="min-h-screen bg-[#f7f8fa] pb-24 text-slate-900" id="salon-men-category-view">
       {/* ===================================================================== */}
-      {/* TOP HEADER (Matching Urban Company navigation bar in video)           */}
+      {/* TOP HEADER (Matching UrgentLyfe navigation bar in video)              */}
       {/* ===================================================================== */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-2xs">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sm:gap-6">
@@ -1083,13 +1083,13 @@ export const SalonMenCategoryView: React.FC<SalonMenCategoryViewProps> = ({
               <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
             </button>
 
-            {/* Urban Company logo text badge */}
+            {/* UrgentLyfe logo text badge */}
             <div className="flex items-center gap-1.5 cursor-pointer" onClick={onClose}>
               <span className="bg-black text-white font-extrabold text-[13px] px-1.5 py-0.5 rounded tracking-tight">
-                uc
+                UL
               </span>
               <span className="font-black text-slate-900 text-base sm:text-lg tracking-tight hidden xs:inline-block">
-                Urban Company
+                UrgentLyfe
               </span>
             </div>
           </div>
@@ -1294,7 +1294,7 @@ export const SalonMenCategoryView: React.FC<SalonMenCategoryViewProps> = ({
                       const qty = getCartQuantity(service.id);
 
                       // =======================================================
-                      // PACKAGE CARD TEMPLATE (Matching Urban Company Video)
+                      // PACKAGE CARD TEMPLATE (Matching UrgentLyfe Video)
                       // =======================================================
                       if (service.isPackage) {
                         return (
@@ -1555,16 +1555,16 @@ export const SalonMenCategoryView: React.FC<SalonMenCategoryViewProps> = ({
           </section>
 
           {/* ------------------------------------------------------------------- */}
-          {/* COLUMN 3: Right Sidebar (UC Promise & Live Cart Widget)              */}
+          {/* COLUMN 3: Right Sidebar (UrgentLyfe Promise & Live Cart Widget)     */}
           {/* ------------------------------------------------------------------- */}
           <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-20">
-            {/* UC Promise Box (Exact layout from video 00:15 / 00:40) */}
+            {/* UrgentLyfe Promise Box (Exact layout from video 00:15 / 00:40) */}
             <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
               <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-1.5">
                 <span className="bg-slate-900 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded">
-                  UC
+                  UL
                 </span>
-                <span>UC Promise</span>
+                <span>UrgentLyfe Promise</span>
               </h3>
 
               <div className="space-y-2.5 text-xs text-slate-700">

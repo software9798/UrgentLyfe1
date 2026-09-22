@@ -22,6 +22,7 @@ import {
 import { ServiceItem, CartItem } from '../../types';
 import { getServiceRichDetail, ServiceRichDetail, ServiceReview } from '../../data/richServiceDetails';
 import { handleImageError } from '../../utils/imageFallback';
+import { SmartServiceTips } from './SmartServiceTips';
 
 interface ServiceDetailModalProps {
   service: ServiceItem | null;
@@ -33,6 +34,7 @@ interface ServiceDetailModalProps {
   cartItems?: CartItem[];
   onAddToCart?: (service: ServiceItem, isUrgent?: boolean) => void;
   onUpdateCartQuantity?: (serviceId: string, delta: number) => void;
+  selectedCityName?: string;
 }
 
 export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
@@ -45,13 +47,14 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
   cartItems = [],
   onAddToCart,
   onUpdateCartQuantity,
+  selectedCityName = 'Bengaluru',
 }) => {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [helpfulClicked, setHelpfulClicked] = useState<Record<string, boolean>>({});
 
   if (!service) return null;
 
-  // Retrieve or generate rich Urban Company details
+  // Retrieve or generate rich UrgentLyfe details
   const detail: ServiceRichDetail = getServiceRichDetail(service);
 
   // Cart status for this service
@@ -195,7 +198,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
               </div>
             </div>
 
-            {/* Urban Company style Add / Quantity Button */}
+            {/* UrgentLyfe style Add / Quantity Button */}
             <div className="shrink-0 pt-1">
               {cartQuantity === 0 ? (
                 <button
@@ -483,6 +486,13 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
               />
             </div>
           </div>
+
+          {/* SMART SERVICE TIPS & AI MAINTENANCE ADVICE */}
+          <SmartServiceTips
+            service={service}
+            city={selectedCityName}
+            onBookUrgentService={service.isUrgentAvailable ? () => onProceedBooking(service, true) : undefined}
+          />
 
           {/* 10. BEFORE YOU BOOK GUIDELINES (Matching video) */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">

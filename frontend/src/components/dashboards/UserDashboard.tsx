@@ -30,6 +30,9 @@ import {
   Calendar,
   X,
   RefreshCw,
+  Crown,
+  Coins,
+  Award,
 } from 'lucide-react';
 import { Booking, UserProfile } from '../../types';
 import { api } from '../../api/client';
@@ -38,11 +41,14 @@ import { getGoogleMapsDirectionsUrl } from '../../utils/directionsHelper';
 import { pushService } from '../../utils/pushNotificationService';
 import { MarketTrendsSection } from '../layout/MarketTrendsSection';
 import { ReferAndEarnSection } from '../layout/ReferAndEarnSection';
+import { LoyaltyBalanceCard } from '../loyalty/LoyaltyBalanceCard';
+import { LoyaltySection } from '../loyalty/LoyaltySection';
 
 interface UserDashboardProps {
   bookings: Booking[];
   walletBalance: number;
-  defaultTab?: 'bookings' | 'trends' | 'refer_earn' | 'profile' | 'ai_history' | 'feedback';
+  loyaltyPoints?: number;
+  defaultTab?: 'bookings' | 'loyalty' | 'trends' | 'refer_earn' | 'profile' | 'ai_history' | 'feedback';
   onTrackBooking: (booking: Booking) => void;
   onOpenAIDoctor: () => void;
   onQuickSOS: () => void;
@@ -52,6 +58,7 @@ interface UserDashboardProps {
   onViewInvoice?: (booking: Booking) => void;
   onOpenDirections?: (booking: Booking) => void;
   onWalletUpdated?: (newBalance: number) => void;
+  onLoyaltyUpdated?: (newPoints: number) => void;
   onCancelBooking?: (bookingId: string) => void;
   onRefreshBookings?: () => void;
 }
@@ -69,12 +76,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   onViewInvoice,
   onOpenDirections,
   onWalletUpdated,
+  onLoyaltyUpdated,
   onCancelBooking,
   onRefreshBookings,
+  loyaltyPoints,
 }) => {
-  const [activeTab, setActiveTab] = useState<'bookings' | 'trends' | 'refer_earn' | 'profile' | 'ai_history' | 'feedback'>(
+  const [activeTab, setActiveTab] = useState<'bookings' | 'loyalty' | 'trends' | 'refer_earn' | 'profile' | 'ai_history' | 'feedback'>(
     defaultTab || 'bookings'
   );
+  const [currentLoyaltyPoints, setCurrentLoyaltyPoints] = useState<number>(loyaltyPoints ?? 340);
+  useEffect(() => {
+    if (loyaltyPoints !== undefined) {
+      setCurrentLoyaltyPoints(loyaltyPoints);
+    }
+  }, [loyaltyPoints]);
   const [downloadSuccessId, setDownloadSuccessId] = useState<string | null>(null);
 
   const handleDownloadInvoice = (booking: Booking) => {
@@ -189,14 +204,30 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20 text-right">
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          {/* Dedicated Loyalty Balance Widget in Header */}
+          <button
+            id="header-loyalty-balance-btn"
+            onClick={() => setActiveTab('loyalty')}
+            className="bg-amber-400/15 hover:bg-amber-400/25 backdrop-blur-md px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl border border-amber-400/40 text-right transition-all cursor-pointer group"
+            title="Click to view Loyalty Rewards & Points Ledger"
+          >
+            <div className="flex items-center justify-end gap-1">
+              <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
+              <p className="text-[10px] text-amber-300 uppercase font-bold tracking-wider">Loyalty Balance</p>
+            </div>
+            <p className="text-lg sm:text-xl font-black text-amber-400 group-hover:scale-105 transition-transform">
+              {currentLoyaltyPoints} <span className="text-[11px] font-bold text-white">PTS</span>
+            </p>
+          </button>
+
+          <div className="bg-white/10 backdrop-blur-md px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl border border-white/20 text-right">
             <p className="text-[10px] text-slate-300 uppercase font-semibold">Wallet Cash</p>
-            <p className="text-xl font-black text-emerald-400">₹{walletBalance}</p>
+            <p className="text-lg sm:text-xl font-black text-emerald-400">₹{walletBalance}</p>
           </div>
           <button
             onClick={onQuickSOS}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-4 py-3 rounded-2xl transition-all cursor-pointer shadow-md flex items-center gap-1.5"
+            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl transition-all cursor-pointer shadow-md flex items-center gap-1.5"
           >
             <Zap className="w-4 h-4 fill-slate-950" />
             <span>30-Min SOS</span>
@@ -216,6 +247,22 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
         >
           <ShoppingBag className="w-4 h-4" />
           <span>Bookings ({bookings.length})</span>
+        </button>
+
+        <button
+          id="tab-loyalty-rewards"
+          onClick={() => setActiveTab('loyalty')}
+          className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-extrabold rounded-2xl transition-all cursor-pointer shrink-0 ${
+            activeTab === 'loyalty'
+              ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md font-black'
+              : 'bg-amber-50/80 text-amber-950 hover:bg-amber-100 border border-amber-300/80'
+          }`}
+        >
+          <Crown className="w-4 h-4 text-amber-600 fill-amber-600" />
+          <span>Loyalty Rewards</span>
+          <span className="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-full font-black">
+            {currentLoyaltyPoints} PTS
+          </span>
         </button>
 
         <button
@@ -297,6 +344,19 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               <span className="text-[11px] text-emerald-700 font-semibold">Check Downloads folder ✓</span>
             </div>
           )}
+
+          {/* DEDICATED LOYALTY BALANCE SECTION */}
+          <LoyaltyBalanceCard
+            loyaltyPoints={currentLoyaltyPoints}
+            bookings={userBookings}
+            onViewRewards={() => setActiveTab('loyalty')}
+            onRedeemPoints={() => setActiveTab('loyalty')}
+            onPointsUpdated={(newPts) => {
+              setCurrentLoyaltyPoints(newPts);
+              onLoyaltyUpdated?.(newPts);
+            }}
+          />
+
           {/* Active Bookings Section */}
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-slate-900 flex items-center justify-between">
@@ -525,7 +585,20 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
                           ✓
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold text-slate-900">{b.service.title}</h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-sm font-bold text-slate-900">{b.service.title}</h3>
+                            {b.status === 'COMPLETED' && (
+                              <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <Sparkles className="w-2.5 h-2.5 text-amber-600" />
+                                <span>+{b.loyaltyPointsEarned || Math.max(25, Math.round(b.totalAmount / 10))} Pts Earned</span>
+                              </span>
+                            )}
+                            {b.loyaltyPointsRedeemed && b.loyaltyPointsRedeemed > 0 && (
+                              <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                -{b.loyaltyPointsRedeemed} Pts Redeemed (₹{b.loyaltyDiscountAmount || b.loyaltyPointsRedeemed} OFF)
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-slate-500">
                             Completed on {new Date(b.createdAt).toLocaleDateString()} • Technician: {b.partner?.name || 'Verified Pro'}
                           </p>
@@ -882,6 +955,19 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
           initialWalletBalance={walletBalance}
           onWalletUpdated={onWalletUpdated}
           onOpenSOS={onQuickSOS}
+        />
+      )}
+
+      {/* TAB: LOYALTY POINTS & PRIVILEGES */}
+      {activeTab === 'loyalty' && (
+        <LoyaltySection
+          loyaltyPoints={currentLoyaltyPoints}
+          bookings={userBookings}
+          onLoyaltyUpdated={(newPts) => {
+            setCurrentLoyaltyPoints(newPts);
+            onLoyaltyUpdated?.(newPts);
+          }}
+          onBookNow={onQuickSOS}
         />
       )}
 

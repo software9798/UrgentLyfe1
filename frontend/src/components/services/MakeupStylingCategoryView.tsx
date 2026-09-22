@@ -292,13 +292,13 @@ export const MakeupStylingCategoryView: React.FC<MakeupStylingCategoryViewProps>
           </div>
 
           {/* ========================================================================= */}
-          {/* RIGHT PANEL: UC PROMISE + CART SUMMARY (Matching Video 00:04-00:23)       */}
+          {/* RIGHT PANEL: URGENTLYFE PROMISE + CART SUMMARY (Matching Video 00:04-00:23)*/}
           {/* ========================================================================= */}
           <div className="lg:col-span-3 xl:col-span-3 lg:sticky lg:top-20 space-y-6">
-            {/* UC Promise / UrgentLyfe Promise matching video */}
+            {/* UrgentLyfe Promise matching video */}
             <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs">
               <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-3">
-                UC Promise
+                UrgentLyfe Promise
               </h3>
               <div className="space-y-2.5">
                 <div className="flex items-center gap-2 text-xs text-slate-700 font-semibold">

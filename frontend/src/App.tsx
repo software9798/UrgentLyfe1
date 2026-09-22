@@ -37,11 +37,14 @@ import {
   SalonDermaModal,
   MensSalonMassageModal,
   HelpCenterView,
+  CleaningPestControlModal,
   MyBookingsView,
   ApplianceRepairModal,
   ApplianceDedicatedPage,
   ApplianceConfig,
   APPLIANCES_LIST,
+  LocationPermissionPrompt,
+  CityExplorerSection,
   Footer,
 } from './components';
 
@@ -51,12 +54,21 @@ import { City, Category, ServiceItem, Booking, AIDiagnosis, Partner, User, Provi
 import { api } from './api/client';
 import { pushService } from './utils/pushNotificationService';
 import { searchServices } from './utils/searchHelper';
-import { Sparkles, Zap, Wrench, ShoppingBag, CheckCircle2, WifiOff, ArrowRightLeft } from 'lucide-react';
+import { detectGPSLocation } from './utils/geoService';
+import { Sparkles, Zap, Wrench, ShoppingBag, CheckCircle2, WifiOff, ArrowRightLeft, AlertCircle } from 'lucide-react';
 
 export default function App() {
   const [cities, setCities] = useState<City[]>(CITIES);
   const [selectedCity, setSelectedCity] = useState<City>(CITIES[0]); // Bengaluru
   const [selectedLocality, setSelectedLocality] = useState<string>(CITIES[0].localities[0]);
+
+  // Geolocation & Auto-Detection State
+  const [showLocationPermissionPrompt, setShowLocationPermissionPrompt] = useState<boolean>(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState<boolean>(false);
+  const [locationDetectionToast, setLocationDetectionToast] = useState<{
+    text: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
 
   const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
@@ -88,7 +100,8 @@ export default function App() {
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState<boolean>(false);
   const [isProviderModalOpen, setIsProviderModalOpen] = useState<boolean>(false);
   const [invoiceBooking, setInvoiceBooking] = useState<Booking | null>(null);
-  const [dashboardDefaultTab, setDashboardDefaultTab] = useState<'bookings' | 'trends' | 'refer_earn' | 'profile' | 'ai_history' | 'feedback'>('bookings');
+  const [dashboardDefaultTab, setDashboardDefaultTab] = useState<'bookings' | 'loyalty' | 'trends' | 'refer_earn' | 'profile' | 'ai_history' | 'feedback'>('bookings');
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(340);
 
   const [selectedServiceDetail, setSelectedServiceDetail] = useState<ServiceItem | null>(null);
   const [isBookingWizardOpen, setIsBookingWizardOpen] = useState<boolean>(false);
@@ -116,6 +129,27 @@ export default function App() {
   const [isSalonDermaModalOpen, setIsSalonDermaModalOpen] = useState<boolean>(false);
   const [isMensSalonMassageModalOpen, setIsMensSalonMassageModalOpen] = useState<boolean>(false);
   const [mensSalonModalInitialStep, setMensSalonModalInitialStep] = useState<'categories' | 'preference'>('categories');
+  const [isCleaningPestModalOpen, setIsCleaningPestModalOpen] = useState<boolean>(false);
+
+  const handleOpenCleaningPest = (initialSubOption?: string) => {
+    if (initialSubOption) {
+      setIsCleaningPestModalOpen(false);
+      const cleanCat = categories.find((c) => c.id === 'cleaning') || {
+        id: 'cleaning',
+        name: 'Cleaning & Pest Control',
+        slug: 'cleaning-pest-control',
+        icon: 'Sparkles',
+        description: 'Bathroom, Kitchen, Full Home & Pest Control',
+        popular: true,
+        serviceCount: 35,
+      };
+      setActiveCategoryInitialSubService(initialSubOption);
+      setActiveCategoryPageView(cleanCat);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setIsCleaningPestModalOpen(true);
+    }
+  };
 
   const handleOpenSalon = (subService?: string) => {
     const salonCat = categories.find((c) => c.id === 'salon');
@@ -311,6 +345,161 @@ export default function App() {
     };
   }, [bookings, currentUser]);
 
+  // Geolocation & Location Permission Handlers
+  const handleDetectLocation = async (userInitiated = false) => {
+    setIsDetectingLocation(true);
+    setLocationDetectionToast(null);
+
+    try {
+      const result = await detectGPSLocation(cities);
+
+      if (result.isNewCity) {
+        setCities((prev) => {
+          if (prev.some((c) => c.id === result.city.id || c.name.toLowerCase() === result.city.name.toLowerCase())) {
+            return prev;
+          }
+          return [result.city, ...prev];
+        });
+      }
+
+      setSelectedCity(result.city);
+      setSelectedLocality(result.locality);
+
+      // Save user consent & detected location preference to localStorage
+      localStorage.setItem('urgentlyfe_geo_consent', 'granted');
+      localStorage.setItem(
+        'urgentlyfe_saved_location',
+        JSON.stringify({ cityId: result.city.id, cityName: result.city.name, locality: result.locality })
+      );
+
+      setLocationDetectionToast({
+        text: `📍 Location set to ${result.locality}, ${result.city.name}`,
+        type: 'success',
+      });
+      setShowLocationPermissionPrompt(false);
+      setTimeout(() => setLocationDetectionToast(null), 5000);
+    } catch (err: any) {
+      const errorMsg = err.message || 'Unable to detect location. Please select your city manually.';
+      const isDenied = errorMsg.toLowerCase().includes('denied');
+      if (isDenied) {
+        localStorage.setItem('urgentlyfe_geo_consent', 'denied');
+      }
+
+      if (userInitiated) {
+        setLocationDetectionToast({
+          text: errorMsg,
+          type: 'error',
+        });
+        setTimeout(() => setLocationDetectionToast(null), 6000);
+      }
+      setShowLocationPermissionPrompt(false);
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  };
+
+  const handleLocationConsentAllow = () => {
+    handleDetectLocation(true);
+  };
+
+  const handleLocationConsentDismiss = () => {
+    localStorage.setItem('urgentlyfe_geo_consent', 'dismissed');
+    setShowLocationPermissionPrompt(false);
+  };
+
+  const handleLocationConsentSelectManually = () => {
+    localStorage.setItem('urgentlyfe_geo_consent', 'dismissed');
+    setShowLocationPermissionPrompt(false);
+    const pickerBtn = document.getElementById('location-picker-btn');
+    pickerBtn?.click();
+  };
+
+  // Browser Geolocation initial check on app load (asking for permission first)
+  useEffect(() => {
+    let isCancelled = false;
+
+    const checkInitialLocation = async () => {
+      const storedConsent = localStorage.getItem('urgentlyfe_geo_consent');
+      const savedLocRaw = localStorage.getItem('urgentlyfe_saved_location');
+
+      // 1. Restore previous saved location from localStorage if present
+      if (savedLocRaw) {
+        try {
+          const parsed = JSON.parse(savedLocRaw);
+          if (parsed.cityId) {
+            const matched = cities.find(
+              (c) => c.id === parsed.cityId || c.name.toLowerCase() === (parsed.cityName || '').toLowerCase()
+            );
+            if (matched && !isCancelled) {
+              setSelectedCity(matched);
+              if (parsed.locality) {
+                setSelectedLocality(parsed.locality);
+              }
+            }
+          }
+        } catch {
+          // ignore parsing error
+        }
+      }
+
+      // 2. If user already granted geolocation consent in the app
+      if (storedConsent === 'granted') {
+        if ('permissions' in navigator && navigator.permissions?.query) {
+          try {
+            const perm = await navigator.permissions.query({ name: 'geolocation' });
+            if (perm.state === 'granted') {
+              if (!isCancelled) handleDetectLocation(false);
+              return;
+            } else if (perm.state === 'denied') {
+              return;
+            }
+          } catch {
+            if (!isCancelled) handleDetectLocation(false);
+            return;
+          }
+        } else {
+          if (!isCancelled) handleDetectLocation(false);
+          return;
+        }
+      }
+
+      // If user previously chose to dismiss or denied, do not auto-prompt again
+      if (storedConsent === 'dismissed' || storedConsent === 'denied') {
+        return;
+      }
+
+      // 3. If browser origin already has granted permission
+      if ('permissions' in navigator && navigator.permissions?.query) {
+        try {
+          const perm = await navigator.permissions.query({ name: 'geolocation' });
+          if (perm.state === 'granted') {
+            if (!isCancelled) handleDetectLocation(false);
+            return;
+          } else if (perm.state === 'denied') {
+            return;
+          }
+        } catch {
+          // continue to prompt
+        }
+      }
+
+      // 4. First time app load: prompt the user politely asking for permission first!
+      const timer = setTimeout(() => {
+        if (!isCancelled) {
+          setShowLocationPermissionPrompt(true);
+        }
+      }, 700);
+
+      return () => clearTimeout(timer);
+    };
+
+    checkInitialLocation();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
   // Restore JWT Session on App Mount
   useEffect(() => {
     const token = localStorage.getItem('urgentlyfe_jwt');
@@ -344,13 +533,26 @@ export default function App() {
     }
   };
 
+  const refreshLoyalty = async () => {
+    try {
+      const summary = await api.getLoyaltySummary();
+      if (summary && typeof summary.points === 'number') {
+        setLoyaltyPoints(summary.points);
+      }
+    } catch (e) {
+      console.warn('Could not fetch loyalty summary', e);
+    }
+  };
+
   useEffect(() => {
     refreshBookings();
+    refreshLoyalty();
   }, []);
 
   useEffect(() => {
     if (activeTab === 'dashboard') {
       refreshBookings();
+      refreshLoyalty();
     }
   }, [activeTab]);
 
@@ -407,11 +609,19 @@ export default function App() {
   const handleBookingSuccess = (newBooking: Booking) => {
     setBookings((prev) => [newBooking, ...prev]);
     setActiveLiveTrackingBooking(newBooking);
-    showToast(
-      newBooking.isUrgent
-        ? '⚡ SOS Order Confirmed! Emergency technician dispatched immediately.'
-        : 'Service slot confirmed successfully!'
-    );
+
+    if (newBooking.loyaltyPointsRedeemed && newBooking.loyaltyPointsRedeemed > 0) {
+      setLoyaltyPoints((prev) => Math.max(0, prev - (newBooking.loyaltyPointsRedeemed || 0)));
+      showToast(
+        `🎉 Booking confirmed! ₹${newBooking.loyaltyDiscountAmount || newBooking.loyaltyPointsRedeemed} loyalty discount applied.`
+      );
+    } else {
+      showToast(
+        newBooking.isUrgent
+          ? '⚡ SOS Order Confirmed! Emergency technician dispatched immediately.'
+          : 'Service slot confirmed successfully!'
+      );
+    }
   };
 
   // Compare Feature Handlers (Max 3 items)
@@ -472,7 +682,12 @@ export default function App() {
       setBookings((prev) =>
         prev.map((b) => (b.id === bookingId ? { ...b, status: status as any } : b))
       );
-      showToast(`Job status updated to ${status}`);
+      if (status === 'COMPLETED') {
+        refreshLoyalty();
+        showToast(`🎉 Service marked COMPLETED! Loyalty points credited.`);
+      } else {
+        showToast(`Job status updated to ${status}`);
+      }
     } catch (err: any) {
       showToast('Failed to update status.');
     }
@@ -507,6 +722,10 @@ export default function App() {
         onSelectCity={setSelectedCity}
         selectedLocality={selectedLocality}
         onSelectLocality={setSelectedLocality}
+        onDetectLocation={() => handleDetectLocation(true)}
+        isDetectingLocation={isDetectingLocation}
+        detectionMessage={locationDetectionToast}
+        onClearDetectionMessage={() => setLocationDetectionToast(null)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         services={services}
@@ -681,6 +900,8 @@ export default function App() {
           <UserDashboard
             bookings={bookings}
             walletBalance={walletBalance}
+            loyaltyPoints={loyaltyPoints}
+            onLoyaltyUpdated={(newPts) => setLoyaltyPoints(newPts)}
             defaultTab={dashboardDefaultTab}
             onWalletUpdated={(newBal) => setWalletBalance(newBal)}
             onTrackBooking={(booking) => setActiveLiveTrackingBooking(booking)}
@@ -788,6 +1009,10 @@ export default function App() {
                 handleOpenMensSalon('categories');
                 return;
               }
+              if (catId === 'cleaning' || catId === 'pest-control' || catId === 'cleaning-pest-control') {
+                handleOpenCleaningPest();
+                return;
+              }
               const mappedId = catId === 'wall-panels' ? 'carpentry-painting' : catId;
               setSelectedCategoryId(mappedId);
               setTimeout(() => {
@@ -826,6 +1051,10 @@ export default function App() {
                 setIsMensSalonMassageModalOpen(true);
                 return;
               }
+              if (categoryId === 'cleaning' || categoryId === 'pest-control' || categoryId === 'cleaning-pest-control') {
+                handleOpenCleaningPest(subServiceKey);
+                return;
+              }
               const cat = categories.find((c) => c.id === categoryId);
               if (cat) {
                 setActiveCategoryInitialSubService(subServiceKey);
@@ -859,6 +1088,10 @@ export default function App() {
                 setIsApplianceModalOpen(true);
                 return;
               }
+              if (categoryId === 'cleaning' || categoryId === 'pest-control' || categoryId === 'cleaning-pest-control') {
+                handleOpenCleaningPest(subServiceKey);
+                return;
+              }
               const cat = categories.find((c) => c.id === categoryId);
               if (cat) {
                 setActiveCategoryInitialSubService(subServiceKey);
@@ -889,6 +1122,10 @@ export default function App() {
                 setIsApplianceModalOpen(true);
                 return;
               }
+              if (categoryId === 'cleaning' || categoryId === 'pest-control' || categoryId === 'cleaning-pest-control') {
+                handleOpenCleaningPest(subServiceKey);
+                return;
+              }
               const cat = categories.find((c) => c.id === categoryId);
               if (cat) {
                 setActiveCategoryInitialSubService(subServiceKey);
@@ -899,6 +1136,61 @@ export default function App() {
             onOpenServiceDetail={(service) => setSelectedServiceDetail(service)}
             onAddToCart={handleAddToCart}
             onQuickBook={(service) => handleStartBooking(service, false)}
+          />
+
+          {/* City Explorer: Metropolitan-specific top popular services and localized guide */}
+          <CityExplorerSection
+            selectedCity={selectedCity}
+            selectedLocality={selectedLocality}
+            cities={cities}
+            onSelectCity={(city) => {
+              setSelectedCity(city);
+              const defaultLoc = city.localities[0] || '';
+              setSelectedLocality(defaultLoc);
+              localStorage.setItem(
+                'urgentlyfe_saved_location',
+                JSON.stringify({ cityId: city.id, cityName: city.name, locality: defaultLoc })
+              );
+            }}
+            onSelectLocality={(locality) => {
+              setSelectedLocality(locality);
+              localStorage.setItem(
+                'urgentlyfe_saved_location',
+                JSON.stringify({ cityId: selectedCity.id, cityName: selectedCity.name, locality })
+              );
+            }}
+            onSelectService={(categoryId, subServiceKey) => {
+              if (categoryId === 'ac-appliance') {
+                if (subServiceKey) {
+                  const targetApp = APPLIANCES_LIST.find(
+                    (a) => a.id === subServiceKey || a.label.toLowerCase().includes(subServiceKey.toLowerCase())
+                  );
+                  if (targetApp) {
+                    setSelectedAppliance(targetApp);
+                    setActiveCategoryPageView(null);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                  }
+                }
+                setIsApplianceModalOpen(true);
+                return;
+              }
+              if (categoryId === 'cleaning' || categoryId === 'pest-control' || categoryId === 'cleaning-pest-control') {
+                handleOpenCleaningPest(subServiceKey);
+                return;
+              }
+              const cat = categories.find((c) => c.id === categoryId);
+              if (cat) {
+                setActiveCategoryInitialSubService(subServiceKey);
+                setActiveCategoryPageView(cat);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            onOpenServiceDetail={(service) => setSelectedServiceDetail(service)}
+            onAddToCart={handleAddToCart}
+            onUpdateCartQuantity={handleUpdateCartQuantity}
+            onQuickBook={(service) => handleStartBooking(service, false)}
+            cartItems={cartItems}
           />
 
           {/* Next homepage sections */}
@@ -1018,6 +1310,7 @@ export default function App() {
         cartItems={cartItems}
         onAddToCart={handleAddToCart}
         onUpdateCartQuantity={handleUpdateCartQuantity}
+        selectedCityName={selectedCity.name}
         onProceedBooking={(s, isUrgent) => {
           setSelectedServiceDetail(null);
           setBookingServiceTarget(s);
@@ -1047,6 +1340,8 @@ export default function App() {
         selectedCity={selectedCity}
         selectedLocality={selectedLocality}
         onBookingSuccess={handleBookingSuccess}
+        loyaltyPoints={loyaltyPoints}
+        onLoyaltyPointsRedeemed={(pts) => setLoyaltyPoints((prev) => Math.max(0, prev - pts))}
       />
 
       <LiveTrackingModal
@@ -1291,6 +1586,15 @@ export default function App() {
         }}
       />
 
+      {/* Cleaning & Pest Control Modal (Matching Video 00:01 - 00:05) */}
+      <CleaningPestControlModal
+        isOpen={isCleaningPestModalOpen}
+        onClose={() => setIsCleaningPestModalOpen(false)}
+        onSelectOption={(option) => {
+          handleOpenCleaningPest(option);
+        }}
+      />
+
       {/* AC & Appliance Repair Modal Overlay matching exact UI reference */}
       <ApplianceRepairModal
         isOpen={isApplianceModalOpen}
@@ -1382,7 +1686,7 @@ export default function App() {
         onOpenCart={() => setIsCartOpen(true)}
       />
 
-      {/* Website Footer matching Urban Company / UrgentLyfe specification */}
+      {/* Website Footer matching UrgentLyfe specification */}
       <Footer
         onOpenProviderModal={() => setIsProviderModalOpen(true)}
         onNavigateCategories={() => {
@@ -1395,6 +1699,44 @@ export default function App() {
         selectedCityName={selectedCity.name}
         selectedLocality={selectedLocality}
       />
+
+      {/* Location Permission Prompt Modal (First-time app load) */}
+      <LocationPermissionPrompt
+        isOpen={showLocationPermissionPrompt}
+        isDetecting={isDetectingLocation}
+        onAllow={handleLocationConsentAllow}
+        onDismiss={handleLocationConsentDismiss}
+        onSelectManually={handleLocationConsentSelectManually}
+      />
+
+      {/* Floating GPS Location Status Toast */}
+      {locationDetectionToast && (
+        <aside
+          aria-label="Location notification"
+          className="fixed top-20 right-4 sm:right-8 z-50 animate-fadeIn pointer-events-auto"
+        >
+          <div
+            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-xl border text-xs font-semibold backdrop-blur-md ${
+              locationDetectionToast.type === 'success'
+                ? 'bg-white/95 text-emerald-900 border-emerald-300'
+                : 'bg-white/95 text-rose-900 border-rose-300'
+            }`}
+          >
+            {locationDetectionToast.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>{locationDetectionToast.text}</span>
+            <button
+              onClick={() => setLocationDetectionToast(null)}
+              className="text-slate-400 hover:text-slate-600 text-xs ml-1 p-0.5 rounded cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        </aside>
+      )}
     </div>
   );
 }

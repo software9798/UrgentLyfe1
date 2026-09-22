@@ -168,6 +168,10 @@ export interface Booking {
   urgentFee: number;
   taxAmount: number;
   discountAmount: number;
+  loyaltyDiscountAmount?: number;
+  loyaltyPointsRedeemed?: number;
+  loyaltyPointsEarned?: number;
+  loyaltyPointsAwarded?: boolean;
   totalAmount: number;
   paymentMethod: 'UPI' | 'CARD' | 'CASH' | 'WALLET';
   paymentStatus: 'PAID' | 'PENDING' | 'REFUNDED';
@@ -409,5 +413,75 @@ export interface SentimentAnalysisData {
     | 'Warm, Grateful & Enthusiastic';
   urgencyLevel: 'CRITICAL_SOS' | 'HIGH' | 'MEDIUM' | 'LOW';
   explanation?: string;
+}
+
+// -------------------------------------------------------------
+// LOYALTY REWARDS & POINTS SYSTEM TYPES
+// -------------------------------------------------------------
+export type LoyaltyTier = 'SILVER' | 'GOLD' | 'PLATINUM';
+
+export interface LoyaltyTierInfo {
+  tier: LoyaltyTier;
+  name: string;
+  minPoints: number;
+  discountMultiplier: number;
+  earningRate: string;
+  badgeColor: string;
+  perks: string[];
+}
+
+export interface LoyaltyTransaction {
+  id: string;
+  userId: string;
+  type: 'EARNED' | 'REDEEMED' | 'BONUS' | 'REFUND';
+  points: number;
+  bookingId?: string;
+  serviceTitle?: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface LoyaltySummary {
+  points: number;
+  rupeeValue: number;
+  tier: LoyaltyTierInfo;
+  nextTierPoints: number;
+  nextTierName: string;
+  progressPercent: number;
+  totalPointsEarnedLifetime: number;
+  totalPointsRedeemedLifetime: number;
+  totalSavingsRupees: number;
+  conversionRate: { points: number; rupees: number };
+  transactions: LoyaltyTransaction[];
+}
+
+// -------------------------------------------------------------
+// SMART SERVICE TIPS & AI MAINTENANCE ADVICE
+// -------------------------------------------------------------
+export type TipCategoryType = 'DIY_PREVENTIVE' | 'EXTEND_LIFESPAN' | 'ENERGY_COST_SAVER' | 'SAFETY_WARNING';
+
+export interface SmartServiceTip {
+  id: string;
+  title: string;
+  tip: string;
+  category: TipCategoryType;
+  categoryLabel: string;
+  frequency: string;
+  impactBadge: string;
+  actionStep: string;
+  proRecommendation: string;
+}
+
+export interface SmartServiceTipsResponse {
+  serviceId: string;
+  serviceTitle: string;
+  overview: string;
+  lifespanExpectancy: string;
+  maintenanceCadence: string;
+  tips: SmartServiceTip[];
+  proSecret: string;
+  warningSign: string;
+  aiGenerated?: boolean;
+  timestamp?: string;
 }
 

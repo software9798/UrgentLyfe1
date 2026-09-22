@@ -1471,7 +1471,7 @@ export const RICH_DETAILS_REGISTRY: Record<string, Partial<ServiceRichDetail>> =
   },
 };
 
-// Generic fallback generator that builds authentic Urban Company style rich detail for ANY service
+// Generic fallback generator that builds authentic UrgentLyfe style rich detail for ANY service
 export function getServiceRichDetail(service: {
   id: string;
   title: string;

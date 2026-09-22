@@ -51,9 +51,13 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{
 }> {
   // Method 1: BigDataCloud Reverse Geocoding (Fast, accurate for India, CORS enabled)
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     const res = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
+      { signal: controller.signal }
     );
+    clearTimeout(timeoutId);
     if (res.ok) {
       const data = await res.json();
       const detectedCity = data.city || data.locality || data.principalSubdivision || '';
@@ -77,14 +81,18 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{
 
   // Method 2: OpenStreetMap Nominatim
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
       {
+        signal: controller.signal,
         headers: {
           'Accept-Language': 'en',
         },
       }
     );
+    clearTimeout(timeoutId);
     if (res.ok) {
       const data = await res.json();
       const addr = data.address || {};
@@ -117,91 +125,107 @@ export async function detectGPSLocation(availableCities: City[]): Promise<Geoloc
       return;
     }
 
+    const processPosition = async (pos: GeolocationPosition) => {
+      try {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        // Attempt online reverse geocoding
+        const geo = await reverseGeocode(lat, lng);
+
+        // Check if detected city matches any in availableCities
+        const normalizedDetectedCity = (geo.city || '').toLowerCase().trim();
+        let matchedCity = availableCities.find(
+          (c) =>
+            c.name.toLowerCase().includes(normalizedDetectedCity) ||
+            normalizedDetectedCity.includes(c.name.toLowerCase()) ||
+            c.id.toLowerCase() === normalizedDetectedCity
+        );
+
+        // If no direct name match, find closest city by coordinates distance
+        const closest = findClosestCity(lat, lng, availableCities);
+
+        // If reverse geocoding found a distinct city (e.g. user in Patna, Jaipur, etc.)
+        let finalCity: City;
+        let isNewCity = false;
+
+        if (matchedCity) {
+          finalCity = matchedCity;
+        } else if (geo.city && geo.city.length > 2) {
+          // Create a dynamic city entry for the user's location
+          finalCity = {
+            id: geo.city.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            name: geo.city,
+            state: geo.state || 'India',
+            popular: false,
+            lat,
+            lng,
+            localities: geo.locality ? [geo.locality, 'Main City Center'] : ['Main City Center'],
+          };
+          isNewCity = true;
+        } else {
+          // Fallback to mathematically closest city in DB
+          finalCity = closest.city;
+        }
+
+        // Determine best locality name
+        let localityName = geo.locality || geo.suburb || '';
+        if (!localityName) {
+          localityName = finalCity.localities?.[0] || 'Central Area';
+        }
+
+        // If locality not in city's list, add it
+        if (!finalCity.localities.includes(localityName)) {
+          finalCity.localities = [localityName, ...finalCity.localities];
+        }
+
+        const formattedAddress =
+          geo.formattedAddress || `${localityName}, ${finalCity.name}${geo.state ? `, ${geo.state}` : ''}`;
+
+        resolve({
+          city: finalCity,
+          locality: localityName,
+          formattedAddress,
+          pincode: geo.pincode,
+          latitude: lat,
+          longitude: lng,
+          isNewCity,
+        });
+      } catch (err: any) {
+        reject(new Error(err.message || 'Failed to parse GPS location.'));
+      }
+    };
+
+    const handleInitialError = (err: GeolocationPositionError) => {
+      // If high accuracy timed out, retry once with low accuracy (ideal for laptops & WiFi)
+      if (err.code === 3) {
+        navigator.geolocation.getCurrentPosition(
+          processPosition,
+          (retryErr) => {
+            reject(new Error('Location request timed out. Please select your city manually from the top bar.'));
+          },
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 }
+        );
+        return;
+      }
+
+      let message = 'Unable to retrieve your location.';
+      if (err.code === 1) {
+        message = 'Location permission was denied. Please allow location access in your browser or select city manually.';
+      } else if (err.code === 2) {
+        message = 'Location information is currently unavailable.';
+      } else if (err.code === 3) {
+        message = 'Location request timed out. Please try again or select city manually.';
+      }
+      reject(new Error(message));
+    };
+
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-
-          // Attempt online reverse geocoding
-          const geo = await reverseGeocode(lat, lng);
-
-          // Check if detected city matches any in availableCities
-          const normalizedDetectedCity = (geo.city || '').toLowerCase().trim();
-          let matchedCity = availableCities.find(
-            (c) =>
-              c.name.toLowerCase().includes(normalizedDetectedCity) ||
-              normalizedDetectedCity.includes(c.name.toLowerCase()) ||
-              c.id.toLowerCase() === normalizedDetectedCity
-          );
-
-          // If no direct name match, find closest city by coordinates distance
-          const closest = findClosestCity(lat, lng, availableCities);
-
-          // If reverse geocoding found a distinct city (e.g. user in Patna, Jaipur, etc.)
-          let finalCity: City;
-          let isNewCity = false;
-
-          if (matchedCity) {
-            finalCity = matchedCity;
-          } else if (geo.city && geo.city.length > 2) {
-            // Create a dynamic city entry for the user's location
-            finalCity = {
-              id: geo.city.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-              name: geo.city,
-              state: geo.state || 'India',
-              popular: false,
-              lat,
-              lng,
-              localities: geo.locality ? [geo.locality, 'Main City Center'] : ['Main City Center'],
-            };
-            isNewCity = true;
-          } else {
-            // Fallback to mathematically closest city in DB
-            finalCity = closest.city;
-          }
-
-          // Determine best locality name
-          let localityName = geo.locality || geo.suburb || '';
-          if (!localityName) {
-            localityName = finalCity.localities?.[0] || 'Central Area';
-          }
-
-          // If locality not in city's list, add it
-          if (!finalCity.localities.includes(localityName)) {
-            finalCity.localities = [localityName, ...finalCity.localities];
-          }
-
-          const formattedAddress =
-            geo.formattedAddress || `${localityName}, ${finalCity.name}${geo.state ? `, ${geo.state}` : ''}`;
-
-          resolve({
-            city: finalCity,
-            locality: localityName,
-            formattedAddress,
-            pincode: geo.pincode,
-            latitude: lat,
-            longitude: lng,
-            isNewCity,
-          });
-        } catch (err: any) {
-          reject(new Error(err.message || 'Failed to parse GPS location.'));
-        }
-      },
-      (err) => {
-        let message = 'Unable to retrieve your location.';
-        if (err.code === 1) {
-          message = 'Location permission was denied. Please allow location access in your browser or select city manually.';
-        } else if (err.code === 2) {
-          message = 'Location information is currently unavailable.';
-        } else if (err.code === 3) {
-          message = 'Location request timed out. Please try again or select city manually.';
-        }
-        reject(new Error(message));
-      },
+      processPosition,
+      handleInitialError,
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 9000,
         maximumAge: 60000,
       }
     );

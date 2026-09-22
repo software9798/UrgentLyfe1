@@ -135,7 +135,7 @@ export const MassageMenCategoryView: React.FC<MassageMenCategoryViewProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black tracking-wider uppercase text-indigo-600">
-                  Urban Company
+                  UrgentLyfe
                 </span>
                 <span className="text-slate-300">•</span>
                 <span className="text-xs font-bold text-slate-600">Men's Care</span>
@@ -313,7 +313,7 @@ export const MassageMenCategoryView: React.FC<MassageMenCategoryViewProps> = ({
               <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white text-xs">
                 <div>
                   <p className="font-black text-sm tracking-tight text-white drop-shadow-sm">
-                    Urban Company Certified Therapists
+                    UrgentLyfe Certified Therapists
                   </p>
                   <p className="text-[11px] text-slate-300 font-medium">
                     Sanitized single-use linen & specialized pressure therapy
@@ -530,17 +530,17 @@ export const MassageMenCategoryView: React.FC<MassageMenCategoryViewProps> = ({
           </div>
 
           {/* =========================================================================
-              RIGHT COLUMN: UC Promise Card + Sticky Cart Card (Cols 10-12)
+              RIGHT COLUMN: UrgentLyfe Promise Card + Sticky Cart Card (Cols 10-12)
               ========================================================================= */}
           <div className="lg:col-span-3 lg:sticky lg:top-20 space-y-4">
-            {/* 1. UC Promise Card (matching video 00:09, 00:11, 00:14, 00:16) */}
+            {/* 1. UrgentLyfe Promise Card (matching video 00:09, 00:11, 00:14, 00:16) */}
             <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-2xs">
                   <ShieldCheck className="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-slate-900 leading-tight">UC Promise</h4>
+                  <h4 className="text-sm font-black text-slate-900 leading-tight">UrgentLyfe Promise</h4>
                   <p className="text-[10px] text-slate-500">Certified spa experience at home</p>
                 </div>
               </div>

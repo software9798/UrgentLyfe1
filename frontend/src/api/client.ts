@@ -20,6 +20,9 @@ import {
   AIRecommendation,
   ReferralRecord,
   ReferralStats,
+  LoyaltySummary,
+  LoyaltyTransaction,
+  SmartServiceTipsResponse,
 } from '../types';
 import { perfMonitor } from '../utils/performance';
 
@@ -197,6 +200,26 @@ export const api = {
     fetchAPI<ReferralStats>('/api/referrals/simulate-complete', {
       method: 'POST',
       body: JSON.stringify({ referralId }),
+    }),
+
+  // LOYALTY REWARDS & POINTS SYSTEM APIs
+  getLoyaltySummary: (): Promise<LoyaltySummary> =>
+    fetchAPI<LoyaltySummary>('/api/users/loyalty'),
+
+  redeemLoyaltyPoints: (data: {
+    points: number;
+    bookingId?: string;
+    description?: string;
+  }): Promise<{ success: boolean; data: { redeemedPoints: number; discountAmount: number; remainingPoints: number; transaction: LoyaltyTransaction }; message: string }> =>
+    fetchAPI<{ success: boolean; data: { redeemedPoints: number; discountAmount: number; remainingPoints: number; transaction: LoyaltyTransaction }; message: string }>('/api/users/loyalty/redeem', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  simulateEarnLoyaltyPoints: (bookingId: string): Promise<{ success: boolean; data: { pointsEarned: number; newBalance: number }; message: string }> =>
+    fetchAPI<{ success: boolean; data: { pointsEarned: number; newBalance: number }; message: string }>('/api/users/loyalty/simulate-earn', {
+      method: 'POST',
+      body: JSON.stringify({ bookingId }),
     }),
 
   // SERVICE PROVIDER APIs
@@ -451,6 +474,20 @@ export const api = {
   getProviderScore: (providerId: string) => fetchAPI<ProviderScore>(`/api/providers/${providerId}/score`),
 
   getSentimentAnalytics: () => fetchAPI<any>('/api/admin/sentiment-analytics'),
+
+  getServiceSmartTips: (params: {
+    serviceId: string;
+    serviceTitle: string;
+    categoryId?: string;
+    description?: string;
+    features?: string[];
+    city?: string;
+    customQuestion?: string;
+  }): Promise<SmartServiceTipsResponse> =>
+    fetchAPI<SmartServiceTipsResponse>('/api/ai/service-tips', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
 
   getAPIDocs: () => fetch('/api/docs').then((r) => r.json()),
 };

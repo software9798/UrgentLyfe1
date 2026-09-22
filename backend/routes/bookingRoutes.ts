@@ -31,6 +31,7 @@ bookingRouter.post('/', (req, res) => {
     aiDiagnosis,
     couponCode,
     userId,
+    loyaltyPointsRedeemed = 0,
   } = req.body;
 
   const service = db.services.get(serviceId);
@@ -53,9 +54,33 @@ bookingRouter.post('/', (req, res) => {
     }
   }
 
-  const taxableAmount = Math.max(0, subtotal + urgentFee - discountAmount);
+  // Loyalty points redemption (1 point = ₹1 discount, up to 50% of bill)
+  const effectiveUserId = userId || 'usr-customer-101';
+  let loyaltyDiscountAmount = 0;
+  let finalLoyaltyPointsRedeemed = 0;
+  if (loyaltyPointsRedeemed && Number(loyaltyPointsRedeemed) > 0) {
+    const requestedPts = Number(loyaltyPointsRedeemed);
+    const user = db.users.get(effectiveUserId);
+    const availablePts = user?.loyaltyPoints || 0;
+    const maxRedeemRupees = Math.floor(Math.max(0, subtotal + urgentFee - discountAmount) * 0.5);
+    finalLoyaltyPointsRedeemed = Math.min(requestedPts, availablePts, maxRedeemRupees);
+    if (finalLoyaltyPointsRedeemed > 0) {
+      loyaltyDiscountAmount = finalLoyaltyPointsRedeemed * 1;
+      db.redeemLoyaltyPoints(
+        effectiveUserId,
+        finalLoyaltyPointsRedeemed,
+        undefined,
+        `Redeemed ${finalLoyaltyPointsRedeemed} loyalty points on ${service.title} booking`
+      );
+    }
+  }
+
+  const taxableAmount = Math.max(0, subtotal + urgentFee - discountAmount - loyaltyDiscountAmount);
   const taxAmount = Math.round(taxableAmount * 0.18);
   const totalAmount = taxableAmount + taxAmount;
+
+  // Expected loyalty points to be earned upon completion
+  const expectedPointsEarned = Math.max(25, Math.round(subtotal / 10)) + (isUrgent ? 15 : 0);
 
   // Find matching provider
   const categoryPartners = Array.from(db.providers.values()).filter(
@@ -65,7 +90,7 @@ bookingRouter.post('/', (req, res) => {
 
   const newBooking: Booking = {
     id: `UL-${Math.floor(1000 + Math.random() * 9000)}`,
-    userId: userId || 'usr-customer-101',
+    userId: effectiveUserId,
     userName: req.body.userName || 'Aarav Mehta',
     userPhone: req.body.userPhone || '+91 98765 12345',
     userAddress,
@@ -94,6 +119,10 @@ bookingRouter.post('/', (req, res) => {
     urgentFee,
     taxAmount,
     discountAmount: Math.round(discountAmount),
+    loyaltyDiscountAmount: Math.round(loyaltyDiscountAmount),
+    loyaltyPointsRedeemed: finalLoyaltyPointsRedeemed,
+    loyaltyPointsEarned: expectedPointsEarned,
+    loyaltyPointsAwarded: false,
     totalAmount,
     paymentMethod,
     paymentStatus: 'PAID',
@@ -172,6 +201,14 @@ bookingRouter.patch('/:id/status', (req, res) => {
       p.availability = 'available';
       p.totalJobs = (p.totalJobs || 0) + 1;
     }
+
+    // Automatically award loyalty points to customer for completed service!
+    try {
+      db.awardCompletedBookingPoints(booking.id);
+    } catch (err) {
+      console.warn('Could not automatically award loyalty points:', err);
+    }
+
     db.addNotification(
       booking.userId,
       'Service Completed! 🎉 Rate Your Experience',

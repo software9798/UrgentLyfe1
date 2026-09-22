@@ -30,6 +30,7 @@ import { HairStudioCategoryView } from './HairStudioCategoryView';
 import { MakeupStylingCategoryView } from './MakeupStylingCategoryView';
 import { SalonMenCategoryView } from './SalonMenCategoryView';
 import { MassageMenCategoryView } from './MassageMenCategoryView';
+import { CleaningPestCategoryView } from './CleaningPestCategoryView';
 
 interface SubServiceConfig {
   id: string;
@@ -1388,6 +1389,36 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
         onSelectServiceDetail={onSelectServiceDetail}
         onClose={onClose}
         onOpenPreferenceModal={onOpenPreferenceModal}
+        selectedCityName={selectedCityName}
+        selectedLocality={selectedLocality}
+      />
+    );
+  }
+
+  // If category is Cleaning & Pest Control (or bathroom-cleaning, kitchen-cleaning, etc.)
+  if (
+    category.id === 'cleaning' ||
+    category.id === 'pest-control' ||
+    category.id === 'cleaning-pest' ||
+    category.id === 'cleaning-pest-control' ||
+    category.id === 'bathroom-cleaning' ||
+    category.id === 'kitchen-cleaning' ||
+    category.id === 'living-bedroom-cleaning' ||
+    category.id === 'full-home-cleaning' ||
+    category.id === 'termite-control' ||
+    category.id === 'leak-gap-sealing' ||
+    category.id === 'tile-grouting'
+  ) {
+    const subCat = initialSubService || category.id;
+    return (
+      <CleaningPestCategoryView
+        initialCategoryId={subCat}
+        cartItems={cartItems}
+        onAddToCart={onAddToCart}
+        onUpdateCartQuantity={onUpdateCartQuantity}
+        onBookNow={onBookNow}
+        onSelectServiceDetail={onSelectServiceDetail}
+        onClose={onClose}
         selectedCityName={selectedCityName}
         selectedLocality={selectedLocality}
       />
